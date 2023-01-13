@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<Version>3.0.9</Version>
+		<AssemblyVersion>1.0.0.0</AssemblyVersion>
+		<Description>User Provider</Description>
+	</PropertyGroup>
+	<PropertyGroup>
+		<PackageProjectUrl>https://doc.dynamicweb.com/</PackageProjectUrl>
+		<PackageTags>Dynamicweb</PackageTags>
+		<Product>Dynamicweb CMS</Product>
+		<Company>Dynamicweb Software A/S</Company>
+		<Authors>Dynamicweb Software A/S</Authors>
+		<Copyright>Copyright © 2020 Dynamicweb Software A/S</Copyright>
+	</PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<FileVersion>3.0.9.0</FileVersion>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Dynamicweb" Version="9.10.19" />
+		<PackageReference Include="Dynamicweb.Configuration" Version="4.1.2" />
+		<PackageReference Include="Dynamicweb.Core" Version="3.1.0" />
+		<PackageReference Include="Dynamicweb.Data" Version="3.0.2" />
+		<PackageReference Include="Dynamicweb.DataIntegration" Version="3.0.11" />
+		<PackageReference Include="Dynamicweb.DataIntegration.Providers.SqlProvider" Version="3.0.0" />
+		<PackageReference Include="Dynamicweb.DataIntegration.Providers.XmlProvider" Version="3.0.0" />
+		<PackageReference Include="Dynamicweb.Ecommerce" Version="1.10.53" />
+		<PackageReference Include="Dynamicweb.Extensibility" Version="4.0.2" />
+		<PackageReference Include="Dynamicweb.Indexing" Version="6.0.1" />
+		<PackageReference Include="Dynamicweb.Logging" Version="5.1.2" />
+		<PackageReference Include="Dynamicweb.Mailing" Version="5.0.3" />
+		<PackageReference Include="Dynamicweb.Security" Version="11.1.0" />
+		<PackageReference Include="Dynamicweb.UserManagement" Version="3.0.3" />
+	</ItemGroup>
+</Project>
