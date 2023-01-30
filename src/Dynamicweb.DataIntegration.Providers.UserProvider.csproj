@@ -1,12 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>3.0.9</Version>
+		<VersionPrefix>10.0.0</VersionPrefix>
+		<VersionSuffix>Alpha0001</VersionSuffix>
 		<AssemblyVersion>1.0.0.0</AssemblyVersion>
 		<Description>User Provider</Description>
 	</PropertyGroup>
 	<PropertyGroup>
 		<PackageProjectUrl>https://doc.dynamicweb.com/</PackageProjectUrl>
-		<PackageTags>Dynamicweb</PackageTags>
+		<PackageTags>Dynamicweb dw10 addin dataintegration providers</PackageTags>
 		<Product>Dynamicweb CMS</Product>
 		<Company>Dynamicweb Software A/S</Company>
 		<Authors>Dynamicweb Software A/S</Authors>
@@ -16,23 +17,17 @@
 		<TargetFramework>net7.0</TargetFramework>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<IncludeSymbols>true</IncludeSymbols>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<ContinuousIntegrationBuild >true</ContinuousIntegrationBuild>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-		<FileVersion>3.0.9.0</FileVersion>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Dynamicweb" Version="9.10.19" />
-		<PackageReference Include="Dynamicweb.Configuration" Version="4.1.2" />
-		<PackageReference Include="Dynamicweb.Core" Version="3.1.0" />
-		<PackageReference Include="Dynamicweb.Data" Version="3.0.2" />
-		<PackageReference Include="Dynamicweb.DataIntegration" Version="3.0.11" />
-		<PackageReference Include="Dynamicweb.DataIntegration.Providers.SqlProvider" Version="3.0.0" />
-		<PackageReference Include="Dynamicweb.DataIntegration.Providers.XmlProvider" Version="3.0.0" />
-		<PackageReference Include="Dynamicweb.Ecommerce" Version="1.10.53" />
-		<PackageReference Include="Dynamicweb.Extensibility" Version="4.0.2" />
-		<PackageReference Include="Dynamicweb.Indexing" Version="6.0.1" />
-		<PackageReference Include="Dynamicweb.Logging" Version="5.1.2" />
-		<PackageReference Include="Dynamicweb.Mailing" Version="5.0.3" />
-		<PackageReference Include="Dynamicweb.Security" Version="11.1.0" />
-		<PackageReference Include="Dynamicweb.UserManagement" Version="3.0.3" />
+		<PackageReference Include="Dynamicweb" Version="10.0.0-*" />
+		<PackageReference Include="Dynamicweb.Core" Version="10.0.0-*" />
+		<PackageReference Include="Dynamicweb.DataIntegration" Version="10.0.0-*" />
+		<PackageReference Include="Dynamicweb.DataIntegration.Providers.SqlProvider" Version="10.0.0-*" />
+		<PackageReference Include="Dynamicweb.DataIntegration.Providers.XmlProvider" Version="10.0.0-*" />
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
 	</ItemGroup>
 </Project>
