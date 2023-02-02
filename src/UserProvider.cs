@@ -189,7 +189,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
 
         #endregion
 
-        internal override SqlConnection Connection
+        protected override SqlConnection Connection
         {
             get { return connection ?? (connection = (SqlConnection)Database.CreateConnection()); }
             set { connection = value; }
@@ -842,7 +842,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                         var index = indexingService.LoadIndex(repoName, repoItem.Name);
                         foreach (var build in index.Builds)
                         {
-                            if (build.Value is Dynamicweb.UserManagement.Indexing.UserIndexBuilder)
+                            if (build.Value is Dynamicweb.Security.UserManagement.Indexing.UserIndexBuilder)
                             {
                                 ret.Add(string.Concat(repoName, "-", repoItem.Name, "-", build.Key), string.Concat(repoName, "-", repoItem.Name.Substring(0, repoItem.Name.LastIndexOf(".")), "-", build.Key));
                             }
