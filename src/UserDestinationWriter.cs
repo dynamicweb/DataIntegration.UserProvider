@@ -471,7 +471,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
             var columnMappings = mapping.GetColumnMappings().Where(cm => cm.Active);
             foreach (ColumnMapping columnMapping in columnMappings)
             {
-                if ((columnMapping.SourceColumn != null && row.ContainsKey(columnMapping.SourceColumn.Name)) || columnMapping.HasScriptWithValue())
+                if ((columnMapping.SourceColumn != null && row.ContainsKey(columnMapping.SourceColumn.Name)) || columnMapping.HasScriptWithValue)
                 {
                     if (columnMapping.ScriptType != ScriptType.None)
                     {
@@ -487,9 +487,10 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                             case ScriptType.Constant:                            
                                 evaluatedValue = columnMapping.GetScriptValue();
                                 break;
+                            case ScriptType.NewGuid:
+                                evaluatedValue = columnMapping.GetScriptValue();
+                                break;
                         }
-                        if (columnMapping.HasNewGuidScript())
-                            evaluatedValue = columnMapping.GetScriptValue();
                         //if some column in source is used two or more times in the mapping and has some ScriptType enabled - skip assigning its value to "row"
                         //it will just be used in "datarow", this is needed for not to erase the values in other mappings with this source column
                         var similarColumnMappings = mapping.GetColumnMappings().Where(cm => cm.Active && cm.SourceColumn != null && string.Compare(cm.SourceColumn.Name, columnMapping.SourceColumn.Name, true) == 0);

@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Dynamicweb.DataIntegration.Integration;
+using Dynamicweb.DataIntegration.Providers.SqlProvider;
+using Dynamicweb.Security.UserManagement;
+using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
-
-using Dynamicweb.DataIntegration.Integration;
-using Dynamicweb.Security.UserManagement;
-using Dynamicweb.DataIntegration.Providers.SqlProvider;
 
 namespace Dynamicweb.DataIntegration.Providers.UserProvider
 {

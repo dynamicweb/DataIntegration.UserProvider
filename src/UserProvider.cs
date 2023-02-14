@@ -49,7 +49,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
             }
         }
 
-        [AddInParameter("User key field"), AddInParameterEditor(typeof(DropDownParameterEditor), "NewGUI=true;SortBy=Key;"), AddInParameterGroup("Destination")]
+        [AddInParameter("User key field"), AddInParameterEditor(typeof(DropDownParameterEditor), "none=true;SortBy=Key;"), AddInParameterGroup("Destination")]
         public string UserKeyField { get; set; }
 
         [AddInParameter("Remove missing users"), AddInParameterEditor(typeof(YesNoParameterEditor), ""), AddInParameterGroup("Destination")]
@@ -76,16 +76,13 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
         [AddInParameter("Remove missing addresses"), AddInParameterEditor(typeof(YesNoParameterEditor), ""), AddInParameterGroup("Destination")]
         public bool RemoveMissingAddresses { get; set; }
 
-        [AddInParameter("Remove missing rows after import in the destination tables only"), AddInParameterEditor(typeof(YesNoParameterEditor), ""), AddInParameterGroup("hidden")]
-        public override bool RemoveMissingAfterImportDestinationTablesOnly { get; set; }
-
         [AddInParameter("Discard duplicates"), AddInParameterEditor(typeof(YesNoParameterEditor), ""), AddInParameterGroup("Destination")]
         public override bool DiscardDuplicates { get; set; }
 
         [AddInParameter("Use email for username"), AddInParameterEditor(typeof(YesNoParameterEditor), ""), AddInParameterGroup("Destination")]
         public bool UseEmailForUsername { get; set; }
 
-        [AddInParameter("Destination group"), AddInParameterEditor(typeof(Dynamicweb.Extensibility.Editors.UserGroupParameterEditor), ""), AddInParameterGroup("Destination")]
+        [AddInParameter("Destination group"), AddInParameterEditor(typeof(UserGroupParameterEditor), ""), AddInParameterGroup("Destination")]
         public string DestinationGroup { get; set; }
 
         [AddInParameter("Import users belong exactly import groups"), AddInParameterEditor(typeof(YesNoParameterEditor), ""), AddInParameterGroup("Destination")]
@@ -93,7 +90,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
 
 
         //Only UI Caption
-        [AddInParameter("E-mail configuration:"), AddInParameterEditor(typeof(LabelParameterEditor), "folder=Templates/eCom;FullPath=true;NewGUI=true"), AddInParameterGroup("Destination")]
+        [AddInParameter("E-mail configuration:"), AddInParameterEditor(typeof(LabelParameterEditor), ""), AddInParameterGroup("Destination")]
         public string EmailConfigurationLabel { get { return " "; } }
 
         [AddInParameter("Mail Subject"), AddInParameterEditor(typeof(TextParameterEditor), ""), AddInParameterGroup("Destination")]
@@ -102,92 +99,13 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
         [AddInParameter("Sender E-mail"), AddInParameterEditor(typeof(TextParameterEditor), ""), AddInParameterGroup("Destination")]
         public string SenderEmail { get; set; }
 
-        [AddInParameter("E-mail Template"), AddInParameterEditor(typeof(TemplateParameterEditor), "folder=Templates/UserManagement/UserProvider;FullPath=true;NewGUI=true"), AddInParameterGroup("Destination")]
+        [AddInParameter("E-mail Template"), AddInParameterEditor(typeof(TemplateParameterEditor), "folder=Templates/UserManagement/UserProvider"), AddInParameterGroup("Destination")]
         public string EmailTemplate { get; set; }
 
         public bool AllowEmail { get; set; }
 
-        [AddInParameter("Repositories index update"), AddInParameterEditor(typeof(DropDownParameterEditor), "valign=top;multiple=true;NewGUI=true;none=true;IconPath=/Admin/Images/Ribbon/Icons/Small/Warning.png;Tooltip=Index update might affect on slower perfomance"), AddInParameterGroup("Destination")]
+        [AddInParameter("Repositories index update"), AddInParameterEditor(typeof(DropDownParameterEditor), "multiple=true;none=true;Tooltip=Index update might affect on slower perfomance"), AddInParameterGroup("Destination")]
         public string RepositoriesIndexUpdate { get; set; }
-
-        #region Hide Properties in the UI section
-
-        [AddInParameter("Source server"), AddInParameterEditor(typeof(TextParameterEditor), "htmlClass=connectionStringInput;"), AddInParameterGroup("hidden")]
-        public override string SourceServer
-        {
-            get { return Server; }
-            set { Server = value; }
-        }
-        [AddInParameter("Destination server"), AddInParameterEditor(typeof(TextParameterEditor), "htmlClass=connectionStringInput;"), AddInParameterGroup("hidden")]
-        public override string DestinationServer
-        {
-            get { return Server; }
-            set { Server = value; }
-        }
-        [AddInParameter("Use integrated security to connect to source server"), AddInParameterEditor(typeof(Extensibility.Editors.YesNoParameterEditor), "htmlClass=connectionStringInput;"), AddInParameterGroup("hidden")]
-        public override bool SourceServerSSPI
-        {
-            get;
-            set;
-        }
-        [AddInParameter("Use integrated security to connect to destination server"), AddInParameterEditor(typeof(Extensibility.Editors.YesNoParameterEditor), "htmlClass=connectionStringInput;"), AddInParameterGroup("hidden")]
-        public override bool DestinationServerSSPI
-        {
-            get;
-            set;
-        }
-        [AddInParameter("Sql source server username"), AddInParameterEditor(typeof(TextParameterEditor), "htmlClass=connectionStringInput;"), AddInParameterGroup("hidden")]
-        public override string SourceUsername
-        {
-            get { return Username; }
-            set { Username = value; }
-        }
-        [AddInParameter("Sql destination server username"), AddInParameterEditor(typeof(TextParameterEditor), "htmlClass=connectionStringInput;"), AddInParameterGroup("hidden")]
-        public override string DestinationUsername
-        {
-            get { return Username; }
-            set { Username = value; }
-        }
-        [AddInParameter("Sql source server password"), AddInParameterEditor(typeof(TextParameterEditor), "htmlClass=connectionStringInput;"), AddInParameterGroup("hidden")]
-        public override string SourcePassword
-        {
-            get { return Password; }
-            set { Password = value; }
-        }
-        [AddInParameter("Sql destination server password"), AddInParameterEditor(typeof(TextParameterEditor), "htmlClass=connectionStringInput;"), AddInParameterGroup("hidden")]
-        public override string DestinationPassword
-        {
-            get { return Password; }
-            set { Password = value; }
-        }
-        [AddInParameter("Sql source database"), AddInParameterEditor(typeof(TextParameterEditor), "htmlClass=connectionStringInput;"), AddInParameterGroup("hidden")]
-        public override string SourceDatabase
-        {
-            get { return Catalog; }
-            set { Catalog = value; }
-        }
-        [AddInParameter("Sql source connection string"), AddInParameterEditor(typeof(TextParameterEditor), "htmlClass=connectionStringInput;"), AddInParameterGroup("hidden")]
-        public override string SourceConnectionString
-        {
-            get { return ManualConnectionString; }
-            set { ManualConnectionString = value; }
-        }
-        [AddInParameter("Sql destination connection string"), AddInParameterEditor(typeof(TextParameterEditor), "htmlClass=connectionStringInput;"), AddInParameterGroup("hidden")]
-        public override string DestinationConnectionString
-        {
-            get { return ManualConnectionString; }
-            set { ManualConnectionString = value; }
-        }
-        [AddInParameter("Sql destination server password"), AddInParameterEditor(typeof(TextParameterEditor), "htmlClass=connectionStringInput;"), AddInParameterGroup("hidden")]
-        public override string DestinationDatabase
-        {
-            get { return Catalog; }
-            set { Catalog = value; }
-        }
-        [AddInParameter("Remove missing rows after import"), AddInParameterEditor(typeof(YesNoParameterEditor), ""), AddInParameterGroup("hidden")]
-        public override bool RemoveMissingAfterImport { get; set; }
-
-        #endregion
 
         protected override SqlConnection Connection
         {
@@ -197,7 +115,6 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
 
         private static Dictionary<string, string> _groupDestinationColumnMapping = new Dictionary<string, string>()
         {
-            //{"GroupID", "AccessUserID" },
             {"AccessGroupGroupName", "AccessUserUserName"},
             {"AccessGroupParentGroupName", "AccessUserParentID"}
         };
@@ -650,7 +567,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                     foreach (string id in Writer.UpdatedUsers)
                     {
                         service.ClearUserCache(id);
-                    }                    
+                    }
                     UpdateIndex(job);
                 }
             }
