@@ -321,7 +321,8 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                                 MappingIdsWithAaccessUserGroupsColumn.Add(mapping.GetId());
                             }
                         }
-                        foreach (ColumnMapping columnMapping in mapping.GetColumnMappings())
+                        var columnMappings = mapping.GetColumnMappings();
+                        foreach (ColumnMapping columnMapping in columnMappings)
                         {
                             destColumns.Add((SqlColumn)columnMapping.DestinationColumn);
                         }
@@ -329,81 +330,81 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                         {
                             case "AccessUser":
                                 bool updateUsersByCustomerNumberMode = IsUpdateUsersByCustomerNumberMode(mapping);
-                                if (!updateUsersByCustomerNumberMode && UseAutoSearching && mapping.GetColumnMappings().Find(m => string.Compare(m.DestinationColumn.Name, "AccessUserID", true) == 0) == null)
+                                if (!updateUsersByCustomerNumberMode && UseAutoSearching && columnMappings.Find(m => string.Compare(m.DestinationColumn.Name, "AccessUserID", true) == 0) == null)
                                 {
                                     destColumns.Add((SqlColumn)mapping.DestinationTable.Columns.Find(m => string.Compare(m.Name, "AccessUserID", true) == 0));
                                 }
-                                if (!updateUsersByCustomerNumberMode && mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserUserName") == null)
+                                if (!updateUsersByCustomerNumberMode && columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserUserName") == null)
                                 {
                                     destColumns.Add((SqlColumn)mapping.DestinationTable.Columns.Find(m => m.Name == "AccessUserUserName"));
                                 }
-                                if (!updateUsersByCustomerNumberMode && mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserPassword") == null)
+                                if (!updateUsersByCustomerNumberMode && columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserPassword") == null)
                                 {
                                     destColumns.Add((SqlColumn)mapping.DestinationTable.Columns.Find(m => m.Name == "AccessUserPassword"));
                                 }
-                                if (mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserActive") == null)
+                                if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserActive") == null)
                                 {
                                     destColumns.Add((SqlColumn)mapping.DestinationTable.Columns.Find(m => m.Name == "AccessUserActive"));
                                 }
-                                if (mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserGroups") == null)
+                                if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserGroups") == null)
                                 {
                                     destColumns.Add((SqlColumn)mapping.DestinationTable.Columns.Find(m => m.Name == "AccessUserGroups"));
                                 }
-                                if (mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserType") == null)
+                                if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserType") == null)
                                 {
                                     destColumns.Add((SqlColumn)mapping.DestinationTable.Columns.Find(m => m.Name == "AccessUserType"));
                                 }
-                                if (_allowEmail && mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserNewsletterAllowed") == null)
+                                if (_allowEmail && columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserNewsletterAllowed") == null)
                                 {
                                     destColumns.Add((SqlColumn)mapping.DestinationTable.Columns.Find(m => m.Name == "AccessUserNewsletterAllowed"));
                                 }
-                                if (mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserCreatedOn") == null)
+                                if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserCreatedOn") == null)
                                 {
                                     destColumns.Add((SqlColumn)mapping.DestinationTable.Columns.Find(m => m.Name == "AccessUserCreatedOn"));
                                 }
-                                if (mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserUpdatedOn") == null)
+                                if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserUpdatedOn") == null)
                                 {
                                     destColumns.Add((SqlColumn)mapping.DestinationTable.Columns.Find(m => m.Name == "AccessUserUpdatedOn"));
                                 }
-                                if (mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserCreatedBy") == null)
+                                if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserCreatedBy") == null)
                                 {
                                     destColumns.Add((SqlColumn)mapping.DestinationTable.Columns.Find(m => m.Name == "AccessUserCreatedBy"));
                                 }
-                                if (mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserUpdatedBy") == null)
+                                if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserUpdatedBy") == null)
                                 {
                                     destColumns.Add((SqlColumn)mapping.DestinationTable.Columns.Find(m => m.Name == "AccessUserUpdatedBy"));
                                 }
                                 break;
                             case "AccessUserGroup":
-                                if (mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserUserName") == null)
+                                if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserUserName") == null)
                                 {
                                     destColumns.Add((SqlColumn)mapping.DestinationTable.Columns.Find(m => m.Name == "AccessUserUserName"));
                                 }
-                                if (mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserName") == null)
+                                if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserName") == null)
                                 {
                                     destColumns.Add((SqlColumn)mapping.DestinationTable.Columns.Find(m => m.Name == "AccessUserName"));
                                 }
-                                if (mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserActive") == null)
+                                if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserActive") == null)
                                 {
                                     destColumns.Add((SqlColumn)mapping.DestinationTable.Columns.Find(m => m.Name == "AccessUserActive"));
                                 }
-                                if (mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserType") == null)
+                                if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserType") == null)
                                 {
                                     destColumns.Add((SqlColumn)mapping.DestinationTable.Columns.Find(m => m.Name == "AccessUserType"));
                                 }
                                 break;
                             case "AccessUserAddress":
-                                if (mapping.GetColumnMappings().Find(m => string.Compare(m.DestinationColumn.Name, "AccessUserAddressUserID", true) == 0) == null)
+                                if (columnMappings.Find(m => string.Compare(m.DestinationColumn.Name, "AccessUserAddressUserID", true) == 0) == null)
                                 {
                                     destColumns.Add((SqlColumn)mapping.DestinationTable.Columns.Find(m => string.Compare(m.Name, "AccessUserAddressUserID", true) == 0));
                                 }
                                 break;
                             case "AccessUserSecondaryRelation":
-                                if (mapping.GetColumnMappings().Find(m => string.Compare(m.DestinationColumn.Name, "AccessUserSecondaryRelationUserID", true) == 0) == null)
+                                if (columnMappings.Find(m => string.Compare(m.DestinationColumn.Name, "AccessUserSecondaryRelationUserID", true) == 0) == null)
                                 {
                                     destColumns.Add((SqlColumn)mapping.DestinationTable.Columns.Find(m => string.Compare(m.Name, "AccessUserSecondaryRelationUserID", true) == 0));
                                 }
-                                if (mapping.GetColumnMappings().Find(m => string.Compare(m.DestinationColumn.Name, "AccessUserSecondaryRelationSecondaryUserID", true) == 0) == null)
+                                if (columnMappings.Find(m => string.Compare(m.DestinationColumn.Name, "AccessUserSecondaryRelationSecondaryUserID", true) == 0) == null)
                                 {
                                     destColumns.Add((SqlColumn)mapping.DestinationTable.Columns.Find(m => string.Compare(m.Name, "AccessUserSecondaryRelationSecondaryUserID", true) == 0));
                                 }
@@ -468,8 +469,8 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
 
             DataRow dataRow = DataToWrite.Tables[GetTableName(mapping.DestinationTable.Name, mapping)].NewRow();
 
-            var columnMappings = mapping.GetColumnMappings().Where(cm => cm.Active);
-            foreach (ColumnMapping columnMapping in columnMappings)
+            var columnMappings = mapping.GetColumnMappings();
+            foreach (ColumnMapping columnMapping in columnMappings.Where(cm => cm.Active))
             {
                 if ((columnMapping.SourceColumn != null && row.ContainsKey(columnMapping.SourceColumn.Name)) || columnMapping.HasScriptWithValue)
                 {
@@ -493,7 +494,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                         }
                         //if some column in source is used two or more times in the mapping and has some ScriptType enabled - skip assigning its value to "row"
                         //it will just be used in "datarow", this is needed for not to erase the values in other mappings with this source column
-                        var similarColumnMappings = mapping.GetColumnMappings().Where(cm => cm.Active && cm.SourceColumn != null && string.Compare(cm.SourceColumn.Name, columnMapping.SourceColumn.Name, true) == 0);
+                        var similarColumnMappings = columnMappings.Where(cm => cm.Active && cm.SourceColumn != null && string.Compare(cm.SourceColumn.Name, columnMapping.SourceColumn.Name, true) == 0);
                         if (similarColumnMappings.Count() == 1)
                         {
                             row[columnMapping.SourceColumn.Name] = evaluatedValue;
@@ -515,32 +516,32 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
             {
                 case "AccessUser":
                     bool updateUsersByCustomerNumberMode = IsUpdateUsersByCustomerNumberMode(mapping);
-                    if (!UseAutoSearching && (mapping.GetColumnMappings().Find(m => string.Compare(m.DestinationColumn.Name, ColumnNameForSearchingUsers, true) == 0) == null ||
-                        !mapping.GetColumnMappings().Find(m => string.Compare(m.DestinationColumn.Name, ColumnNameForSearchingUsers, true) == 0).Active))
+                    if (!UseAutoSearching && (columnMappings.Find(m => string.Compare(m.DestinationColumn.Name, ColumnNameForSearchingUsers, true) == 0) == null ||
+                        !columnMappings.Find(m => string.Compare(m.DestinationColumn.Name, ColumnNameForSearchingUsers, true) == 0).Active))
                     {
                         throw new Exception(string.Format("User key field: '{0}' must be included in the mapping.", ColumnNameForSearchingUsers));
                     }
                     DataRow existingUser = updateUsersByCustomerNumberMode ? null : GetExistingUser(row, mapping);                    
                     if (existingUser != null)
                     {
-                        if (UseAutoSearching && mapping.GetColumnMappings().Find(m => string.Compare(m.DestinationColumn.Name, "AccessUserID", true) == 0) == null)
+                        if (UseAutoSearching && columnMappings.Find(m => string.Compare(m.DestinationColumn.Name, "AccessUserID", true) == 0) == null)
                         {
                             dataRow["AccessUserID"] = existingUser["AccessUserID"];                            
                         }
                         UpdatedUsers.Add(Converter.ToString(existingUser["AccessUserID"]));
                     }
-                    if (mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserActive") == null)
+                    if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserActive") == null)
                     {
                         dataRow["AccessUserActive"] = (existingUser != null) ? existingUser["AccessUserActive"] : true;
                     }
-                    if (mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserType") == null)
+                    if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserType") == null)
                     {
                         dataRow["AccessUserType"] = (existingUser != null) ? existingUser["AccessUserType"] : _UserType;
                     }
                     if (!updateUsersByCustomerNumberMode)
                     {
                         //if no source column is mapped to accessUserUserName in destination
-                        if (mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserUserName") == null)
+                        if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserUserName") == null)
                         {
                             if (existingUser != null && !string.IsNullOrWhiteSpace(Converter.ToString(existingUser["AccessUserUserName"])))
                             {
@@ -548,7 +549,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                             }
                             else if (_useEmailForUsername)
                             {
-                                ColumnMapping cm = mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserEmail");
+                                ColumnMapping cm = columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserEmail");
                                 if (cm != null)
                                 {
                                     dataRow["AccessUserUserName"] = row[cm.SourceColumn.Name];
@@ -559,14 +560,14 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                         {
                             if (_useEmailForUsername)
                             {
-                                ColumnMapping cm = mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserEmail");
+                                ColumnMapping cm = columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserEmail");
                                 if (cm != null && !string.IsNullOrEmpty(Converter.ToString(row[cm.SourceColumn.Name])))
                                 {
                                     dataRow["AccessUserUserName"] = row[cm.SourceColumn.Name];
                                 }
                             }
                         }
-                        if (mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserPassword") == null && existingUser != null)
+                        if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserPassword") == null && existingUser != null)
                         {
                             dataRow["AccessUserPassword"] = existingUser["AccessUserPassword"];
                         }
@@ -574,11 +575,12 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                         string password = string.Empty;
                         //the user is being imported for the first time, and no mapping for the password column is set, 
                         //the user is being imported for the first time, there is a mapping, and the input is either NULL or ""                    
-                        bool isPasswordPresentInSource = mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserPassword") != null &&
-                            !string.IsNullOrEmpty(row[mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserPassword").SourceColumn.Name] as string);
+                        var pcm = columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserPassword");
+                        bool isPasswordPresentInSource = pcm != null &&
+                            !string.IsNullOrEmpty(row[pcm.SourceColumn.Name] as string);
                         if (isPasswordPresentInSource)
                         {
-                            password = row[mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserPassword").SourceColumn.Name] as string;
+                            password = row[pcm.SourceColumn.Name] as string;
                             if (_encryptUserPasswords)
                             {
                                 string encryptedPassword = encryptedPassword = Crypto.EncryptPassword(password, _userPasswordHashAlgorithm);
@@ -605,24 +607,26 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                             string.IsNullOrEmpty(Converter.ToString(existingUser["AccessUserPassword"]))))
                         {
                             string name = null;
-                            if (mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserName") != null)
-                                name = row[mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserName").SourceColumn.Name] as string;
+                            var cm = columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserName");
+                            if (cm != null)
+                                name = row[cm.SourceColumn.Name] as string;
                             string userName = null;
-                            if (mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserUserName") != null)
-                                userName = row[mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserUserName").SourceColumn.Name] as string;
-                            if (mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserEmail") != null && Converter.ToBoolean(dataRow["AccessUserActive"]) == true)
+                            cm = columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserUserName");
+                            if (cm != null)
+                                userName = row[cm.SourceColumn.Name] as string;
+                            if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserEmail") != null && Converter.ToBoolean(dataRow["AccessUserActive"]) == true)
                             {
-                                string email = row[mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserEmail").SourceColumn.Name] as string;
+                                string email = row[columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserEmail").SourceColumn.Name] as string;
                                 UserPassword userPasswordData = new UserPassword(userName, name, password, email);
-                                if (mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserCountry") != null)
+                                if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserCountry") != null)
                                 {
-                                    userPasswordData.Country = row[mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserCountry").SourceColumn.Name] as string;
+                                    userPasswordData.Country = row[columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserCountry").SourceColumn.Name] as string;
                                 }
                                 UsersPasswordsToSend.Add(userPasswordData);
                             }
                         }
                     }
-                    if (mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserGroups") == null && existingUser != null && !_deleteOnlyFromGroupsThatAreImportedTo)
+                    if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserGroups") == null && existingUser != null && !_deleteOnlyFromGroupsThatAreImportedTo)
                     {
                         string userGroups = Converter.ToString(existingUser["AccessUserGroups"]);
                         if (!string.IsNullOrEmpty(userGroups))
@@ -631,7 +635,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                         }
                         dataRow["AccessUserGroups"] = userGroups;
                     }
-                    if (_allowEmail && mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserNewsletterAllowed") == null && existingUser != null)
+                    if (_allowEmail && columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserNewsletterAllowed") == null && existingUser != null)
                     {
                         dataRow["AccessUserNewsletterAllowed"] = existingUser["AccessUserNewsletterAllowed"];
                     }
@@ -643,25 +647,25 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                     break;
                 case "AccessUserGroup":
                     string groupName = string.Empty;
-                    if (mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserName") == null
-                        && mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserUserName") != null)
+                    if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserName") == null
+                        && columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserUserName") != null)
                     {
-                        groupName = ((string)row[mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserUserName").SourceColumn.Name]).Trim();
+                        groupName = ((string)row[columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserUserName").SourceColumn.Name]).Trim();
                         dataRow["AccessUserUserName"] = groupName;
                         dataRow["AccessUserName"] = groupName;//AccessUserName field should be the same as AccessUserUserName
                     }
-                    else if (mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserUserName") == null
-                       && mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserName") != null)
+                    else if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserUserName") == null
+                       && columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserName") != null)
                     {
-                        groupName = ((string)row[mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserName").SourceColumn.Name]).Trim();
+                        groupName = ((string)row[columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserName").SourceColumn.Name]).Trim();
                         dataRow["AccessUserName"] = groupName;
                         dataRow["AccessUserUserName"] = groupName;//AccessUserUserName field should be the same as AccessUserName
                     }
-                    if (mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserActive") == null)
+                    if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserActive") == null)
                     {
                         dataRow["AccessUserActive"] = true;
                     }
-                    if (mapping.GetColumnMappings().Find(m => m.DestinationColumn.Name == "AccessUserType") == null)
+                    if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserType") == null)
                     {
                         //Handle GroupType: If it is not existing group - import with AccessType = 2
                         if (!string.IsNullOrEmpty(groupName) && ExistingUserGroups.ContainsKey(groupName))
@@ -673,7 +677,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                             dataRow["AccessUserType"] = _GroupUserType;
                         }
                     }
-                    if (mapping.GetColumnMappings().Find(cm => string.Compare(cm.DestinationColumn.Name, "AccessUserParentID", true) == 0) != null)
+                    if (columnMappings.Find(cm => string.Compare(cm.DestinationColumn.Name, "AccessUserParentID", true) == 0) != null)
                     {
                         if (dataRow["AccessUserParentID"] != DBNull.Value)
                         {
@@ -705,11 +709,11 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                     }
                     break;
                 case "SystemFieldValue":
-                    if (mapping.GetColumnMappings().Find(cm => string.Compare(cm.DestinationColumn.Name, "SystemFieldValueSystemName", true) == 0) != null)
+                    if (columnMappings.Find(cm => string.Compare(cm.DestinationColumn.Name, "SystemFieldValueSystemName", true) == 0) != null)
                     {
-                        if (row[mapping.GetColumnMappings().Find(m => string.Compare(m.DestinationColumn.Name, "SystemFieldValueSystemName", true) == 0).SourceColumn.Name] != DBNull.Value)
+                        if (row[columnMappings.Find(m => string.Compare(m.DestinationColumn.Name, "SystemFieldValueSystemName", true) == 0).SourceColumn.Name] != DBNull.Value)
                         {
-                            string fieldValueSystemName = Converter.ToString(row[mapping.GetColumnMappings().Find(m => string.Compare(m.DestinationColumn.Name, "SystemFieldValueSystemName", true) == 0).SourceColumn.Name]);
+                            string fieldValueSystemName = Converter.ToString(row[columnMappings.Find(m => string.Compare(m.DestinationColumn.Name, "SystemFieldValueSystemName", true) == 0).SourceColumn.Name]);
                             if (!string.IsNullOrEmpty(fieldValueSystemName) && !SystemFields.Any(sf => string.Compare(sf.SystemName, fieldValueSystemName, true) == 0))
                             {
                                 _logger.Log(string.Format("Can't find the '{0}' in the user system fields. Skipped row: '{1}'.", fieldValueSystemName, BaseProvider.GetFailedSourceRowMessage(row)));
@@ -862,8 +866,9 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                 }
                 sqlClean.Append($" WHERE NOT EXISTS  (SELECT * FROM [{mapping.DestinationTable.SqlSchema}].[{tempTableName}TempTableForBulkImport{mapping.GetId()}] where ");
 
-                bool isPrimaryKeyColumnExists = mapping.GetColumnMappings().Any(cm => cm.Active && ((SqlColumn)cm.DestinationColumn).IsPrimaryKey);
-                foreach (ColumnMapping columnMapping in mapping.GetColumnMappings())
+                var columnMappings = mapping.GetColumnMappings();
+                bool isPrimaryKeyColumnExists = columnMappings.Any(cm => cm.Active && ((SqlColumn)cm.DestinationColumn).IsPrimaryKey);
+                foreach (ColumnMapping columnMapping in columnMappings)
                 {
                     if (columnMapping.Active)
                     {
@@ -911,7 +916,8 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
             //Do Move for each mapped table
             foreach (Mapping mapping in _job.Mappings)
             {
-                if (mapping.Active && mapping.GetColumnMappings().Count > 0)
+                var columnMappings = mapping.GetColumnMappings();
+                if (mapping.Active && columnMappings.Count > 0)
                 {
                     if (mapping.DestinationTable.Name == "AccessUserAddress" && DataToWrite.Tables[GetTableName("AccessUserAddress", mapping)] != null)
                     {
@@ -930,7 +936,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                     MoveDataToMainTable(mapping, sqlTransaction);
 
                     if (mapping.DestinationTable.Name == "AccessUserGroup" &&
-                        mapping.GetColumnMappings().Find(cm => string.Compare(cm.DestinationColumn.Name, "AccessUserParentID", true) == 0) != null)
+                        columnMappings.Find(cm => string.Compare(cm.DestinationColumn.Name, "AccessUserParentID", true) == 0) != null)
                     {
                         UpdateGroupHierarchy(sqlTransaction);
                     }
@@ -966,27 +972,28 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                     if (accessUserMapping != null)
                     {
                         bool updateUsersByCustomerNumberMode = IsUpdateUsersByCustomerNumberMode(accessUserMapping);
-                        if (!updateUsersByCustomerNumberMode && accessUserMapping.GetColumnMappings().Find(cm => cm.DestinationColumn.Name == "AccessUserUserName") == null)
+                        var accessUserColumnMappings = accessUserMapping.GetColumnMappings();
+                        if (!updateUsersByCustomerNumberMode && accessUserColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserUserName") == null)
                         {
                             accessUserMapping.AddMapping(randomColumn,
                                 _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserUserName"), true);
                         }
-                        if (!updateUsersByCustomerNumberMode && accessUserMapping.GetColumnMappings().Find(cm => cm.DestinationColumn.Name == "AccessUserPassword") == null)
+                        if (!updateUsersByCustomerNumberMode && accessUserColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserPassword") == null)
                         {
                             accessUserMapping.AddMapping(randomColumn,
                                 _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserPassword"), true);
                         }
-                        if (accessUserMapping.GetColumnMappings().Find(cm => cm.DestinationColumn.Name == "AccessUserActive") == null)
+                        if (accessUserColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserActive") == null)
                         {
                             accessUserMapping.AddMapping(randomColumn,
                                 _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserActive"), true);
                         }
-                        if (accessUserMapping.GetColumnMappings().Find(cm => cm.DestinationColumn.Name == "AccessUserType") == null)
+                        if (accessUserColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserType") == null)
                         {
                             accessUserMapping.AddMapping(randomColumn,
                                 _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserType"), true);
                         }
-                        if (_allowEmail && accessUserMapping.GetColumnMappings().Find(cm => cm.DestinationColumn.Name == "AccessUserNewsletterAllowed") == null)
+                        if (_allowEmail && accessUserColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserNewsletterAllowed") == null)
                         {
                             accessUserMapping.AddMapping(randomColumn,
                                 _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserNewsletterAllowed"), false);
@@ -996,19 +1003,19 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                             accessUserMapping.AddMapping(randomColumn,
                                 _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserGroups"), false);
                         }
-                        if (accessUserMapping.GetColumnMappings().Find(cm => cm.DestinationColumn.Name == "AccessUserCreatedOn") == null)
+                        if (accessUserColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserCreatedOn") == null)
                         {
                             accessUserMapping.AddMapping(randomColumn, _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserCreatedOn"), false);
                         }
-                        if (accessUserMapping.GetColumnMappings().Find(cm => cm.DestinationColumn.Name == "AccessUserUpdatedOn") == null)
+                        if (accessUserColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserUpdatedOn") == null)
                         {
                             accessUserMapping.AddMapping(randomColumn, _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserUpdatedOn"), false);
                         }
-                        if (accessUserMapping.GetColumnMappings().Find(cm => cm.DestinationColumn.Name == "AccessUserCreatedBy") == null)
+                        if (accessUserColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserCreatedBy") == null)
                         {
                             accessUserMapping.AddMapping(randomColumn, _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserCreatedBy"), false);
                         }
-                        if (accessUserMapping.GetColumnMappings().Find(cm => cm.DestinationColumn.Name == "AccessUserUpdatedBy") == null)
+                        if (accessUserColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserUpdatedBy") == null)
                         {
                             accessUserMapping.AddMapping(randomColumn, _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserUpdatedBy"), false);
                         }
@@ -1021,22 +1028,23 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                 {
                     if (groupMapping != null)
                     {
-                        if (groupMapping.GetColumnMappings().Find(cm => cm.DestinationColumn.Name == "AccessUserUserName") == null)
+                        var groupColumnMappings = groupMapping.GetColumnMappings();
+                        if (groupColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserUserName") == null)
                         {
                             groupMapping.AddMapping(randomColumn,
                                 _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserUserName"), true);
                         }
-                        if (groupMapping.GetColumnMappings().Find(cm => cm.DestinationColumn.Name == "AccessUserName") == null)
+                        if (groupColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserName") == null)
                         {
                             groupMapping.AddMapping(randomColumn,
                                 _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserName"), true);
                         }
-                        if (groupMapping.GetColumnMappings().Find(cm => cm.DestinationColumn.Name == "AccessUserActive") == null)
+                        if (groupColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserActive") == null)
                         {
                             groupMapping.AddMapping(randomColumn,
                                 _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserActive"), true);
                         }
-                        if (groupMapping.GetColumnMappings().Find(cm => cm.DestinationColumn.Name == "AccessUserType") == null)
+                        if (groupColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserType") == null)
                         {
                             groupMapping.AddMapping(randomColumn,
                                 _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserType"), true);
@@ -1085,7 +1093,8 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
             {
                 string sqlConditions = "";
                 string firstKey = "";
-                bool isPrimaryKeyColumnExists = mapping.GetColumnMappings().Any(cm => cm.Active && ((SqlColumn)cm.DestinationColumn).IsPrimaryKey);
+                var columnMappings = mapping.GetColumnMappings();
+                bool isPrimaryKeyColumnExists = columnMappings.Any(cm => cm.Active && ((SqlColumn)cm.DestinationColumn).IsPrimaryKey);
                 if (UseAutoSearching && !isPrimaryKeyColumnExists && mapping.DestinationTable.Name != "AccessUserGroup" && mapping.DestinationTable.Name != "AccessUserAddress")
                 {
                     sqlConditions = sqlConditions + "[" + mapping.DestinationTable.SqlSchema + "].[" +
@@ -1096,7 +1105,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                 }
                 else
                 {
-                    foreach (ColumnMapping columnMapping in mapping.GetColumnMappings())
+                    foreach (ColumnMapping columnMapping in columnMappings)
                     {
                         if (columnMapping.Active)
                         {
@@ -1119,7 +1128,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                 var updateColumnList = new List<string>();
                 var insertSelectList = new List<string>();
 
-                foreach (ColumnMapping columnMapping in mapping.GetColumnMappings())
+                foreach (ColumnMapping columnMapping in columnMappings)
                 {
                     if (columnMapping.Active)
                     {
@@ -1603,9 +1612,10 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
         private DataRow GetExistingUserBySearchColumn(Dictionary<string, object> row, Mapping mapping, string searchColumn)
         {
             DataRow ret = null;
-            if (mapping.GetColumnMappings().Find(m => string.Compare(m.DestinationColumn.Name, searchColumn, true) == 0) != null)
+            var columnMappings = mapping.GetColumnMappings();
+            if (columnMappings.Find(m => string.Compare(m.DestinationColumn.Name, searchColumn, true) == 0) != null)
             {
-                string searchValue = Converter.ToString(row[mapping.GetColumnMappings().Find(m => string.Compare(m.DestinationColumn.Name, searchColumn, true) == 0).SourceColumn.Name]);
+                string searchValue = Converter.ToString(row[columnMappings.Find(m => string.Compare(m.DestinationColumn.Name, searchColumn, true) == 0).SourceColumn.Name]);
                 ret = GetExistingUserBySearchColumn(searchColumn, searchValue);
             }
             return ret;
