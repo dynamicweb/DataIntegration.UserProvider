@@ -63,6 +63,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
         private readonly bool _skipFailingRows;
         internal List<string> UpdatedUsers = new List<string>();
         private List<int> MappingsWithUpdateUsersByCustomerNumberMode = new List<int>();
+        private TableCollection _schemaTables = null;
 
         /// <summary>
         /// Return rows affected
@@ -110,6 +111,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
             _job = job;
             _connection = connection;
             _skipFailingRows = skipFailingRows;
+            _schemaTables = _job.Destination.GetSchema().GetTables();
 
             _sqlCommand = connection.CreateCommand();
             _sqlCommand.CommandTimeout = 3600;
@@ -303,7 +305,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
 
         internal void CreateTempTables()
         {
-            foreach (Table table in _job.Destination.GetSchema().GetTables())
+            foreach (Table table in _schemaTables)
             {
                 //enumareate all found mappings with same destination table name and create separate temp table with mapping id
                 foreach (var mapping in _job.Mappings.FindAll(m => m.DestinationTable.Name == table.Name))
@@ -976,48 +978,48 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                         if (!updateUsersByCustomerNumberMode && accessUserColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserUserName") == null)
                         {
                             accessUserMapping.AddMapping(randomColumn,
-                                _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserUserName"), true);
+                                _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserUserName"), true);
                         }
                         if (!updateUsersByCustomerNumberMode && accessUserColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserPassword") == null)
                         {
                             accessUserMapping.AddMapping(randomColumn,
-                                _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserPassword"), true);
+                                _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserPassword"), true);
                         }
                         if (accessUserColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserActive") == null)
                         {
                             accessUserMapping.AddMapping(randomColumn,
-                                _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserActive"), true);
+                                _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserActive"), true);
                         }
                         if (accessUserColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserType") == null)
                         {
                             accessUserMapping.AddMapping(randomColumn,
-                                _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserType"), true);
+                                _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserType"), true);
                         }
                         if (_allowEmail && accessUserColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserNewsletterAllowed") == null)
                         {
                             accessUserMapping.AddMapping(randomColumn,
-                                _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserNewsletterAllowed"), false);
+                                _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserNewsletterAllowed"), false);
                         }
                         if (!string.IsNullOrEmpty(_importGroupID))
                         {
                             accessUserMapping.AddMapping(randomColumn,
-                                _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserGroups"), false);
+                                _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserGroups"), false);
                         }
                         if (accessUserColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserCreatedOn") == null)
                         {
-                            accessUserMapping.AddMapping(randomColumn, _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserCreatedOn"), false);
+                            accessUserMapping.AddMapping(randomColumn, _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserCreatedOn"), false);
                         }
                         if (accessUserColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserUpdatedOn") == null)
                         {
-                            accessUserMapping.AddMapping(randomColumn, _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserUpdatedOn"), false);
+                            accessUserMapping.AddMapping(randomColumn, _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserUpdatedOn"), false);
                         }
                         if (accessUserColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserCreatedBy") == null)
                         {
-                            accessUserMapping.AddMapping(randomColumn, _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserCreatedBy"), false);
+                            accessUserMapping.AddMapping(randomColumn, _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserCreatedBy"), false);
                         }
                         if (accessUserColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserUpdatedBy") == null)
                         {
-                            accessUserMapping.AddMapping(randomColumn, _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserUpdatedBy"), false);
+                            accessUserMapping.AddMapping(randomColumn, _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserUpdatedBy"), false);
                         }
                     }
                 }
@@ -1032,22 +1034,22 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                         if (groupColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserUserName") == null)
                         {
                             groupMapping.AddMapping(randomColumn,
-                                _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserUserName"), true);
+                                _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserUserName"), true);
                         }
                         if (groupColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserName") == null)
                         {
                             groupMapping.AddMapping(randomColumn,
-                                _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserName"), true);
+                                _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserName"), true);
                         }
                         if (groupColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserActive") == null)
                         {
                             groupMapping.AddMapping(randomColumn,
-                                _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserActive"), true);
+                                _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserActive"), true);
                         }
                         if (groupColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserType") == null)
                         {
                             groupMapping.AddMapping(randomColumn,
-                                _job.Destination.GetSchema().GetTables().Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserType"), true);
+                                _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserType"), true);
                         }
                     }
                 }
@@ -1058,7 +1060,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                 {
                     if (mapping != null)
                     {
-                        mapping.AddMapping(randomColumn, _job.Destination.GetSchema().GetTables().Find(t => t.Name == "SystemFieldValue").Columns.Find(c => c.Name == "SystemFieldValueTableName"), true);
+                        mapping.AddMapping(randomColumn, _schemaTables.Find(t => t.Name == "SystemFieldValue").Columns.Find(c => c.Name == "SystemFieldValueTableName"), true);
                     }
                 }
             }
