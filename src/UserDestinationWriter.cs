@@ -279,11 +279,11 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
         }
 
         private void CheckMappingsUsersByCustomerNumberMode()
-        {            
+        {
             foreach (var mapping in _job.Mappings.FindAll(m => m.DestinationTable.Name == "AccessUser"))
             {
                 if (mapping != null)
-                {                    
+                {
                     var cm = mapping.GetColumnMappings();
                     if (!_generateUserPasswords && !_encryptUserPasswords && !_useEmailForUsername &&
                         cm.Find(m => m.DestinationColumn.Name == "AccessUserCustomerNumber") != null &&
@@ -301,7 +301,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
         {
             return MappingsWithUpdateUsersByCustomerNumberMode.Contains(mapping.GetId());
         }
-                
+
 
         internal void CreateTempTables()
         {
@@ -487,7 +487,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                             case ScriptType.Prepend:
                                 evaluatedValue = columnMapping.ScriptValue + columnMapping.ConvertInputToOutputFormat(row[columnMapping.SourceColumn.Name]);
                                 break;
-                            case ScriptType.Constant:                            
+                            case ScriptType.Constant:
                                 evaluatedValue = columnMapping.GetScriptValue();
                                 break;
                             case ScriptType.NewGuid:
@@ -523,12 +523,12 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                     {
                         throw new Exception(string.Format("User key field: '{0}' must be included in the mapping.", ColumnNameForSearchingUsers));
                     }
-                    DataRow existingUser = updateUsersByCustomerNumberMode ? null : GetExistingUser(row, mapping);                    
+                    DataRow existingUser = updateUsersByCustomerNumberMode ? null : GetExistingUser(row, mapping);
                     if (existingUser != null)
                     {
                         if (UseAutoSearching && columnMappings.Find(m => string.Compare(m.DestinationColumn.Name, "AccessUserID", true) == 0) == null)
                         {
-                            dataRow["AccessUserID"] = existingUser["AccessUserID"];                            
+                            dataRow["AccessUserID"] = existingUser["AccessUserID"];
                         }
                         UpdatedUsers.Add(Converter.ToString(existingUser["AccessUserID"]));
                     }
@@ -864,7 +864,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                 }
                 else
                 {
-                    sqlClean = new StringBuilder($"DELETE FROM [{ mapping.DestinationTable.SqlSchema }].[{destinationTableName}]");
+                    sqlClean = new StringBuilder($"DELETE FROM [{mapping.DestinationTable.SqlSchema}].[{destinationTableName}]");
                 }
                 sqlClean.Append($" WHERE NOT EXISTS  (SELECT * FROM [{mapping.DestinationTable.SqlSchema}].[{tempTableName}TempTableForBulkImport{mapping.GetId()}] where ");
 
@@ -888,7 +888,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                     sqlClean.Append(extraConditions);
                 }
                 List<SqlParameter> parameters = new List<SqlParameter>();
-                string mappingConditions = mapping.Conditionals.GetConditionalsSql(out parameters, true, true);
+                string mappingConditions = MappingExtensions.GetConditionalsSql(out parameters, mapping.Conditionals, true, true);
                 if (!string.IsNullOrEmpty(mappingConditions))
                 {
                     mappingConditions = mappingConditions.Substring(0, mappingConditions.Length - 4);

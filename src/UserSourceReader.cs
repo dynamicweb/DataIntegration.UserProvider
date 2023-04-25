@@ -77,28 +77,8 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                     conditionalSourceColumnName = UserProvider.GetOriginalColumnNameForGroups(conditional.SourceColumn.Name);
                 }
 
-                if (conditional.ConditionalOperator == ConditionalOperator.In)
-                {
-                    var conditionalValue = conditional.Condition;
-                    if (!string.IsNullOrEmpty(conditionalValue))
-                    {
-                        if (conditional.SourceColumn.Type == typeof(string))
-                        {
-                            conditionalValue = string.Join(",", conditionalValue.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(val => $"'{val}'"));
-                        }
-                    }
-                    conditionalsSql = conditionalsSql + "[" + conditional.SourceColumn.Name + "] " + MappingConditional.ConditionalOperatorSqlValue(conditional.ConditionalOperator) + " (" + conditionalValue + ") and ";
-                    continue;
-                }
-                else if (conditional.ConditionalOperator != ConditionalOperator.Contains)
-                {
-                    conditionalsSql = conditionalsSql + "[" + conditionalSourceColumnName + "] " + MappingConditional.ConditionalOperatorSqlValue(conditional.ConditionalOperator) + " @conditional" + conditionalCount + " and ";
-                }
-                else if (!string.IsNullOrEmpty(conditional.Condition))
-                {
-                    conditionalsSql = conditionalsSql + "[" + conditionalSourceColumnName + "] " + MappingConditional.ConditionalOperatorSqlValue(conditional.ConditionalOperator) + " '%" + conditional.Condition + "%' and ";
-                    continue;
-                }
+                conditionalsSql = MappingExtensions.GetConditionalSql(conditionalsSql, conditionalSourceColumnName, conditional, conditionalCount);
+
                 if (conditional.SourceColumn.Type == typeof(DateTime))
                 {
                     _command.Parameters.AddWithValue("@conditional" + conditionalCount, DateTime.Parse(conditional.Condition));

@@ -560,7 +560,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                     if (Writer.RowsAffected > 0)
                     {
                         //Clear group cache for refreshing users in the groups they were imported
-                        Group.ClearCache();                        
+                        Group.ClearCache();
                     }
                     UnifiedPermissionService service = new UnifiedPermissionService();
                     foreach (string id in Writer.UpdatedUsers)
