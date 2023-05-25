@@ -54,7 +54,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
 
         private List<UserPassword> UsersPasswordsToSend;
         private readonly int _passwordLength = 8;
-        private string[] SearchingUserColumns = new string[] { "AccessUserID", "AccessUserUserName", "AccessUserCustomerNumber", "AccessUserEmail" };
+        private string[] SearchingUserColumns = new string[] { "AccessUserID", "AccessUserUserName", "AccessUserCustomerNumber", "AccessUserEmail", "AccessUserExternalId" };
         private SystemFieldCollection SystemFields = SystemField.GetSystemFields("AccessUser");
         private readonly bool discardDuplicates;
         protected DuplicateRowsHandler duplicateRowsHandler;
