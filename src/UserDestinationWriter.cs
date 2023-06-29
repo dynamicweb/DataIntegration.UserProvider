@@ -54,7 +54,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
 
         private List<UserPassword> UsersPasswordsToSend;
         private readonly int _passwordLength = 8;
-        private string[] SearchingUserColumns = new string[] { "AccessUserID", "AccessUserUserName", "AccessUserCustomerNumber", "AccessUserEmail" };
+        private string[] SearchingUserColumns = new string[] { "AccessUserID", "AccessUserUserName", "AccessUserCustomerNumber", "AccessUserEmail", "AccessUserExternalId" };
         private SystemFieldCollection SystemFields = SystemField.GetSystemFields("AccessUser");
         private readonly bool discardDuplicates;
         protected DuplicateRowsHandler duplicateRowsHandler;
@@ -464,11 +464,6 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
 
         public void Write(Dictionary<string, object> row, Mapping mapping, bool discardDuplicates)
         {
-            if (!mapping.Conditionals.CheckConditionals(row))
-            {
-                return;
-            }
-
             DataRow dataRow = DataToWrite.Tables[GetTableName(mapping.DestinationTable.Name, mapping)].NewRow();
 
             var columnMappings = mapping.GetColumnMappings();
@@ -476,37 +471,16 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
             {
                 if ((columnMapping.SourceColumn != null && row.ContainsKey(columnMapping.SourceColumn.Name)) || columnMapping.HasScriptWithValue)
                 {
-                    if (columnMapping.ScriptType != ScriptType.None)
+                    object evaluatedValue = columnMapping.ConvertInputValueToOutputValue(row[columnMapping.SourceColumn?.Name] ?? null);
+
+                    //if some column in source is used two or more times in the mapping and has some ScriptType enabled - skip assigning its value to "row"
+                    //it will just be used in "datarow", this is needed for not to erase the values in other mappings with this source column
+                    var similarColumnMappings = columnMappings.Where(cm => cm.Active && cm.SourceColumn != null && string.Compare(cm.SourceColumn.Name, columnMapping.SourceColumn.Name, true) == 0);
+                    if (similarColumnMappings.Count() == 1)
                     {
-                        object evaluatedValue = null;
-                        switch (columnMapping.ScriptType)
-                        {
-                            case ScriptType.Append:
-                                evaluatedValue = columnMapping.ConvertInputToOutputFormat(row[columnMapping.SourceColumn.Name]) + columnMapping.ScriptValue;
-                                break;
-                            case ScriptType.Prepend:
-                                evaluatedValue = columnMapping.ScriptValue + columnMapping.ConvertInputToOutputFormat(row[columnMapping.SourceColumn.Name]);
-                                break;
-                            case ScriptType.Constant:
-                                evaluatedValue = columnMapping.GetScriptValue();
-                                break;
-                            case ScriptType.NewGuid:
-                                evaluatedValue = columnMapping.GetScriptValue();
-                                break;
-                        }
-                        //if some column in source is used two or more times in the mapping and has some ScriptType enabled - skip assigning its value to "row"
-                        //it will just be used in "datarow", this is needed for not to erase the values in other mappings with this source column
-                        var similarColumnMappings = columnMappings.Where(cm => cm.Active && cm.SourceColumn != null && string.Compare(cm.SourceColumn.Name, columnMapping.SourceColumn.Name, true) == 0);
-                        if (similarColumnMappings.Count() == 1)
-                        {
-                            row[columnMapping.SourceColumn.Name] = evaluatedValue;
-                        }
-                        dataRow[columnMapping.DestinationColumn.Name] = evaluatedValue;
+                        row[columnMapping.SourceColumn.Name] = evaluatedValue;
                     }
-                    else
-                    {
-                        dataRow[columnMapping.DestinationColumn.Name] = columnMapping.ConvertInputToOutputFormat(row[columnMapping.SourceColumn.Name]);
-                    }
+                    dataRow[columnMapping.DestinationColumn.Name] = evaluatedValue;
                 }
                 else
                 {

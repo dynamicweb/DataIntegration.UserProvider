@@ -29,14 +29,14 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
         private UserDestinationWriter Writer = null;
         public bool IsFirstJobRun = true;
 
-        [AddInParameter("Export users created and edited since last export"), AddInParameterEditor(typeof(YesNoParameterEditor), ""), AddInParameterGroup("Source")]
+        [AddInParameter("Export users created and edited since last export"), AddInLabel("Export users created or edited since last export"), AddInParameterEditor(typeof(YesNoParameterEditor), ""), AddInParameterGroup("Source")]
         public virtual bool ExportNotExportedUsers { get; set; }
 
-        [AddInParameter("Export users that have been added or edited after"), AddInParameterEditor(typeof(YesNoParameterEditor), ""), AddInParameterGroup("Source")]
+        [AddInParameter("Export users that have been added or edited after"), AddInLabel("Export users created or edited after selected date time"), AddInParameterEditor(typeof(YesNoParameterEditor), ""), AddInParameterGroup("Source")]
         public virtual bool ExportNotExportedAfter { get; set; }
 
         private DateTime _exportNotExportedAfterDate = DateTime.Now;
-        [AddInParameter("Not exported after"), AddInParameterEditor(typeof(DateTimeParameterEditor), ""), AddInParameterGroup("Source")]
+        [AddInParameter("Not exported after"), AddInLabel(""), AddInParameterEditor(typeof(DateTimeParameterEditor), ""), AddInParameterGroup("Source")]
         public virtual DateTime ExportNotExportedAfterDate
         {
             get
@@ -315,82 +315,132 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                         break;
                     case "UserKeyField":
                         if (node.FirstChild != null && node.FirstChild.Value != null)
+                        {
                             UserKeyField = node.FirstChild.Value;
+                        }
                         break;
                     case "RemoveMissingUsers":
-                        RemoveMissingUsers = node.FirstChild.Value == "True";
+                        if (node.HasChildNodes)
+                        {
+                            RemoveMissingUsers = node.FirstChild.Value == "True";
+                        }
                         break;
                     case "DeactivateMissingUsers":
-                        DeactivateMissingUsers = node.FirstChild.Value == "True";
+                        if (node.HasChildNodes)
+                        {
+                            DeactivateMissingUsers = node.FirstChild.Value == "True";
+                        }
                         break;
                     case "GenerateUserPasswords":
-                        GenerateUserPasswords = node.FirstChild.Value == "True";
+                        if (node.HasChildNodes)
+                        {
+                            GenerateUserPasswords = node.FirstChild.Value == "True";
+                        }
                         break;
                     case "EncryptUserPasswords":
-                        EncryptUserPasswords = node.FirstChild.Value == "True";
+                        if (node.HasChildNodes)
+                        {
+                            EncryptUserPasswords = node.FirstChild.Value == "True";
+                        }
                         break;
                     case "RemoveMissingGroups":
-                        RemoveMissingGroups = node.FirstChild.Value == "True";
+                        if (node.HasChildNodes)
+                        {
+                            RemoveMissingGroups = node.FirstChild.Value == "True";
+                        }
                         break;
                     case "RemoveMissingImpersonation":
-                        RemoveMissingImpersonation = node.FirstChild.Value == "True";
+                        if (node.HasChildNodes)
+                        {
+                            RemoveMissingImpersonation = node.FirstChild.Value == "True";
+                        }
                         break;
                     case "RemoveMissingAddresses":
-                        RemoveMissingAddresses = node.FirstChild.Value == "True";
+                        if (node.HasChildNodes)
+                        {
+                            RemoveMissingAddresses = node.FirstChild.Value == "True";
+                        }
                         break;
                     case "UseEmailForUsername":
-                        UseEmailForUsername = node.FirstChild.Value == "True";
+                        if (node.HasChildNodes)
+                        {
+                            UseEmailForUsername = node.FirstChild.Value == "True";
+                        }
                         break;
                     case "DestinationFolder":
                         if (node.FirstChild != null && node.FirstChild.Value != null)
+                        {
                             DestinationGroup = node.FirstChild.Value;
+                        }
                         break;
                     case "MailSubject":
                         if (node.FirstChild != null && node.FirstChild.Value != null)
+                        {
                             MailSubject = node.FirstChild.Value;
+                        }
                         break;
                     case "SenderEmail":
                         if (node.FirstChild != null && node.FirstChild.Value != null)
+                        {
                             SenderEmail = node.FirstChild.Value;
+                        }
                         break;
                     case "EmailTemplate":
                         if (node.FirstChild != null && node.FirstChild.Value != null)
+                        {
                             EmailTemplate = node.FirstChild.Value;
+                        }
                         break;
                     case "ExportNotExportedUsers":
                         if (node.FirstChild != null && node.FirstChild.Value != null)
+                        {
                             ExportNotExportedUsers = node.FirstChild.Value == "True";
+                        }
                         break;
                     case "ExportNotExportedAfter":
                         if (node.FirstChild != null && node.FirstChild.Value != null)
+                        {
                             ExportNotExportedAfter = node.FirstChild.Value == "True";
+                        }
                         break;
                     case "ExportNotExportedAfterDate":
                         if (node.FirstChild != null && node.FirstChild.Value != null)
                         {
-                            DateTime dt;
-                            if (DateTime.TryParse(node.FirstChild.Value, out dt))
+                            if (DateTime.TryParse(node.FirstChild.Value, out DateTime dt))
+                            {
                                 ExportNotExportedAfterDate = dt;
+                            }
                         }
                         break;
                     case "DeleteOnlyFromGroupsThatAreImportedTo":
-                        DeleteOnlyFromGroupsThatAreImportedTo = node.FirstChild.Value == "True";
+                        if (node.HasChildNodes)
+                        {
+                            DeleteOnlyFromGroupsThatAreImportedTo = node.FirstChild.Value == "True";
+                        }
                         break;
                     case "DiscardDuplicates":
                         if (node.HasChildNodes)
+                        {
                             DiscardDuplicates = node.FirstChild.Value == "True";
+                        }
                         break;
                     case "ImportUsersBelongExactlyImportGroups":
                         if (node.HasChildNodes)
+                        {
                             ImportUsersBelongExactlyImportGroups = node.FirstChild.Value == "True";
+                        }
                         break;
                     case "RepositoriesIndexUpdate":
                         if (node.HasChildNodes)
+                        {
                             RepositoriesIndexUpdate = node.FirstChild.Value;
+                        }
                         break;
                     case "SkipFailingRows":
                         if (node.HasChildNodes)
+                        {
                             SkipFailingRows = node.FirstChild.Value == "True";
+                        }
                         break;
                 }
             }
