@@ -107,6 +107,81 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
         [AddInParameter("Repositories index update"), AddInParameterEditor(typeof(DropDownParameterEditor), "multiple=true;none=true;Tooltip=Index update might affect on slower perfomance"), AddInParameterGroup("Destination")]
         public string RepositoriesIndexUpdate { get; set; }
 
+        #region HideParameters
+        [AddInParameter("Source server"), AddInParameterEditor(typeof(TextParameterEditor), ""), AddInParameterGroup("hidden")]
+        public override string SourceServer
+        {
+            get { return Server; }
+            set { Server = value; }
+        }
+        [AddInParameter("Destination server"), AddInParameterEditor(typeof(TextParameterEditor), ""), AddInParameterGroup("hidden")]
+        public override string DestinationServer
+        {
+            get { return Server; }
+            set { Server = value; }
+        }
+        [AddInParameter("Use integrated security to connect to source server"), AddInParameterEditor(typeof(Extensibility.Editors.YesNoParameterEditor), ""), AddInParameterGroup("hidden")]
+        public override bool SourceServerSSPI
+        {
+            get;
+            set;
+        }
+        [AddInParameter("Use integrated security to connect to destination server"), AddInParameterEditor(typeof(Extensibility.Editors.YesNoParameterEditor), ""), AddInParameterGroup("hidden")]
+        public override bool DestinationServerSSPI
+        {
+            get;
+            set;
+        }
+        [AddInParameter("Sql source server username"), AddInParameterEditor(typeof(TextParameterEditor), ""), AddInParameterGroup("hidden")]
+        public override string SourceUsername
+        {
+            get { return Username; }
+            set { Username = value; }
+        }
+        [AddInParameter("Sql destination server username"), AddInParameterEditor(typeof(TextParameterEditor), ""), AddInParameterGroup("hidden")]
+        public override string DestinationUsername
+        {
+            get { return Username; }
+            set { Username = value; }
+        }
+        [AddInParameter("Sql source server password"), AddInParameterEditor(typeof(TextParameterEditor), ""), AddInParameterGroup("hidden")]
+        public override string SourcePassword
+        {
+            get { return Password; }
+            set { Password = value; }
+        }
+        [AddInParameter("Sql destination server password"), AddInParameterEditor(typeof(TextParameterEditor), ""), AddInParameterGroup("hidden")]
+        public override string DestinationPassword
+        {
+            get { return Password; }
+            set { Password = value; }
+        }
+        [AddInParameter("Sql source database"), AddInParameterEditor(typeof(TextParameterEditor), ""), AddInParameterGroup("hidden")]
+        public override string SourceDatabase
+        {
+            get { return Catalog; }
+            set { Catalog = value; }
+        }
+        [AddInParameter("Sql source connection string"), AddInParameterEditor(typeof(TextParameterEditor), ""), AddInParameterGroup("hidden")]
+        public override string SourceConnectionString
+        {
+            get { return ManualConnectionString; }
+            set { ManualConnectionString = value; }
+        }
+        [AddInParameter("Sql destination connection string"), AddInParameterEditor(typeof(TextParameterEditor), ""), AddInParameterGroup("hidden")]
+        public override string DestinationConnectionString
+        {
+            get { return ManualConnectionString; }
+            set { ManualConnectionString = value; }
+        }
+        [AddInParameter("Sql destination server password"), AddInParameterEditor(typeof(TextParameterEditor), ""), AddInParameterGroup("hidden")]
+        public override string DestinationDatabase
+        {
+            get { return Catalog; }
+            set { Catalog = value; }
+        }
+        #endregion
+
         protected override SqlConnection Connection
         {
             get { return connection ?? (connection = (SqlConnection)Database.CreateConnection()); }
