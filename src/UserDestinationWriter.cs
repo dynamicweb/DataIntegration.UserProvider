@@ -469,16 +469,21 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
             var columnMappings = mapping.GetColumnMappings();
             foreach (ColumnMapping columnMapping in columnMappings.Where(cm => cm.Active))
             {
-                if ((columnMapping.SourceColumn != null && row.ContainsKey(columnMapping.SourceColumn.Name)) || columnMapping.HasScriptWithValue)
+                object rowValue = null;
+                bool hasValueInRow = row.TryGetValue(columnMapping.SourceColumn?.Name, out rowValue);
+                if (columnMapping.HasScriptWithValue || hasValueInRow)                    
                 {
-                    object evaluatedValue = columnMapping.ConvertInputValueToOutputValue(row[columnMapping.SourceColumn?.Name] ?? null);
+                    object evaluatedValue = columnMapping.ConvertInputValueToOutputValue(rowValue);
 
-                    //if some column in source is used two or more times in the mapping and has some ScriptType enabled - skip assigning its value to "row"
-                    //it will just be used in "datarow", this is needed for not to erase the values in other mappings with this source column
-                    var similarColumnMappings = columnMappings.Where(cm => cm.Active && cm.SourceColumn != null && string.Compare(cm.SourceColumn.Name, columnMapping.SourceColumn.Name, true) == 0);
-                    if (similarColumnMappings.Count() == 1)
+                    if (hasValueInRow)
                     {
-                        row[columnMapping.SourceColumn.Name] = evaluatedValue;
+                        //if some column in source is used two or more times in the mapping and has some ScriptType enabled - skip assigning its value to "row"
+                        //it will just be used in "datarow", this is needed for not to erase the values in other mappings with this source column
+                        var similarColumnMappings = columnMappings.Where(cm => cm.Active && cm.SourceColumn != null && string.Compare(cm.SourceColumn.Name, columnMapping.SourceColumn.Name, true) == 0);
+                        if (similarColumnMappings.Count() == 1)
+                        {
+                            row[columnMapping.SourceColumn.Name] = evaluatedValue;
+                        }
                     }
                     dataRow[columnMapping.DestinationColumn.Name] = evaluatedValue;
                 }
