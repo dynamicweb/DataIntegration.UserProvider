@@ -1466,8 +1466,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                                 tmpl.SetTag("DWUsers:User:Username", user.UserName);
                                 tmpl.SetTag("DWUsers:User:Password", user.Password);
                                 tmpl.SetTag("DWUsers:User:Name", user.Name);
-                                tmpl.SetTag("DWUsers:User:Email", user.Email);
-                                tmpl.SetTag("DWUsers:User:LoginToken", Frontend.LogOnHandler.GetLoginToken(user.UserName, user.Password));
+                                tmpl.SetTag("DWUsers:User:Email", user.Email);                                
 
                                 if (!string.IsNullOrEmpty(user.Country))
                                 {
