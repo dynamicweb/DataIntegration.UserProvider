@@ -1314,8 +1314,14 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                     {
                         if (userGroupsRelations[userColumnUserValuePair].Count > 0)
                         {
-                            _sqlCommand.CommandText = string.Format("update AccessUser set AccessUserGroups='{0}' where {1} = {2};",
-                                string.Format("@{0}@", string.Join("@@", userGroupsRelations[userColumnUserValuePair])), userColumnUserValuePair.Item1, userColumnUserValuePair.Item2);
+                            var groupIds = userGroupsRelations[userColumnUserValuePair];
+                            _sqlCommand.CommandText += $"insert into AccessUserGroupRelation (AccessUserGroupRelationUserId, AccessUserGroupRelationGroupId) " +
+                                $"SELECT a.AccessUserId, g.GroupId FROM AccessUser AS a " +
+                                $"CROSS JOIN ( SELECT AccessUserId AS GroupId FROM AccessUser WHERE AccessUserId IN ({string.Join(",", groupIds)}) ) AS g " +
+                                $"WHERE {userColumnUserValuePair.Item1} = {userColumnUserValuePair.Item2} " +
+                                $"AND NOT EXISTS ( SELECT 1 FROM AccessUserGroupRelation WHERE AccessUserGroupRelationUserId = a.AccessUserId AND AccessUserGroupRelationGroupId = g.GroupId );";
+                            //_sqlCommand.CommandText = string.Format("update AccessUser set AccessUserGroups='{0}' where {1} = {2};",
+                            //    string.Format("@{0}@", string.Join("@@", userGroupsRelations[userColumnUserValuePair])), userColumnUserValuePair.Item1, userColumnUserValuePair.Item2);
                             try
                             {
                                 RowsAffected += _sqlCommand.ExecuteNonQuery();
@@ -1352,8 +1358,12 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
                                     //split query into smaller parts for not overflow max query size
                                     if ((i > 0 && i % 1000 == 0) || i == usersArr.Length - 1)
                                     {
-                                        _sqlCommand.CommandText = string.Format("update AccessUser set AccessUserGroups=IsNull(AccessUserGroups, '')+'@{0}@' where {1} IN ({2}) and (not AccessUserGroups like '%@{0}@%' or AccessUserGroups is null);",
-                                                    groupId, column, users.ToString().TrimStart(new char[] { ',' }));
+
+                                        _sqlCommand.CommandText += $"insert into AccessUserGroupRelation (AccessUserGroupRelationUserId, AccessUserGroupRelationGroupId) " +
+                                            $"SELECT AccessUserId, {groupId} from AccessUser WHERE {column} IN ({users.ToString().TrimStart(new char[] { ',' })}) " +
+                                            $"AND NOT EXISTS ( SELECT 1 FROM AccessUserGroupRelation WHERE AccessUserGroupRelationUserId = AccessUserId AND AccessUserGroupRelationGroupId = {groupId} );";
+                                        //_sqlCommand.CommandText = string.Format("update AccessUser set AccessUserGroups=IsNull(AccessUserGroups, '')+'@{0}@' where {1} IN ({2}) and (not AccessUserGroups like '%@{0}@%' or AccessUserGroups is null);",
+                                        //            groupId, column, users.ToString().TrimStart(new char[] { ',' }));
                                         try
                                         {
                                             RowsAffected += _sqlCommand.ExecuteNonQuery();
