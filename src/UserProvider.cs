@@ -52,34 +52,34 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
         [AddInParameter("User key field"), AddInParameterEditor(typeof(DropDownParameterEditor), "none=true;SortBy=Key;"), AddInParameterGroup("Destination")]
         public string UserKeyField { get; set; }
 
-        [AddInParameter("Remove missing users"), AddInParameterEditor(typeof(YesNoParameterEditor), ""), AddInParameterGroup("Destination")]
+        [AddInParameter("Remove missing users"), AddInParameterEditor(typeof(YesNoParameterEditor), "Tooltip=When this option is ON, non-system users not in the source data are removed"), AddInParameterGroup("Destination")]
         public bool RemoveMissingUsers { get; set; }
 
-        [AddInParameter("Deactivate missing users"), AddInParameterEditor(typeof(YesNoParameterEditor), ""), AddInParameterGroup("Destination")]
+        [AddInParameter("Deactivate missing users"), AddInParameterEditor(typeof(YesNoParameterEditor), "Tooltip=When this option is ON, all users which are not present in the source data are set to inactive (AccessUserActive = false)"), AddInParameterGroup("Destination")]
         public bool DeactivateMissingUsers { get; set; }
 
-        [AddInParameter("Generate passwords for users"), AddInParameterEditor(typeof(YesNoParameterEditor), ""), AddInParameterGroup("Destination")]
+        [AddInParameter("Generate passwords for users"), AddInParameterEditor(typeof(YesNoParameterEditor), "Tooltip=Generates a password for imported users, provided that the user is new (not already in the Dynamicweb database) and the source data contains either no password or a NULL or empty string in the password column. If the user is already in the database and has NULL or an empty string as a password, a password will also be generated"), AddInParameterGroup("Destination")]
         public bool GenerateUserPasswords { get; set; }
 
-        [AddInParameter("Encrypt passwords"), AddInParameterEditor(typeof(YesNoParameterEditor), ""), AddInParameterGroup("Destination")]
+        [AddInParameter("Encrypt passwords"), AddInParameterEditor(typeof(YesNoParameterEditor), "Tooltip=Encrypts passwords present in the source data, and passwords generated for new users using the Generate passwords for users option. If Generate passwords for users is ON, they are also encrypted"), AddInParameterGroup("Destination")]
         public bool EncryptUserPasswords { get; set; }
 
-        [AddInParameter("Delete users only from groups that are imported to"), AddInParameterEditor(typeof(YesNoParameterEditor), ""), AddInParameterGroup("Destination")]
+        [AddInParameter("Delete users only from groups that are imported to"), AddInParameterEditor(typeof(YesNoParameterEditor), "Tooltip=If Remove missing users is ON, and you import to a user group, users which are not in that user group will be removed. Only used in conjunction with Remove missing users – otherwise ignored"), AddInParameterGroup("Destination")]
         public bool DeleteOnlyFromGroupsThatAreImportedTo { get; set; }
 
-        [AddInParameter("Remove missing groups"), AddInParameterEditor(typeof(YesNoParameterEditor), ""), AddInParameterGroup("Destination")]
+        [AddInParameter("Remove missing groups"), AddInParameterEditor(typeof(YesNoParameterEditor), "Tooltip=Removes user groups not present in the source data"), AddInParameterGroup("Destination")]
         public bool RemoveMissingGroups { get; set; }
 
-        [AddInParameter("Remove missing impersonation"), AddInParameterEditor(typeof(YesNoParameterEditor), ""), AddInParameterGroup("Destination")]
+        [AddInParameter("Remove missing impersonation"), AddInParameterEditor(typeof(YesNoParameterEditor), "Tooltip=Removes impersonation rows not present in the source data"), AddInParameterGroup("Destination")]
         public bool RemoveMissingImpersonation { get; set; }
 
-        [AddInParameter("Remove missing addresses"), AddInParameterEditor(typeof(YesNoParameterEditor), ""), AddInParameterGroup("Destination")]
+        [AddInParameter("Remove missing addresses"), AddInParameterEditor(typeof(YesNoParameterEditor), "Tooltip=Removes adresses not present in the source data"), AddInParameterGroup("Destination")]
         public bool RemoveMissingAddresses { get; set; }
 
-        [AddInParameter("Discard duplicates"), AddInParameterEditor(typeof(YesNoParameterEditor), ""), AddInParameterGroup("Destination")]
+        [AddInParameter("Discard duplicates"), AddInParameterEditor(typeof(YesNoParameterEditor), "Tooltip=When ON, duplicate rows are ignored"), AddInParameterGroup("Destination")]
         public override bool DiscardDuplicates { get; set; }
 
-        [AddInParameter("Use email for username"), AddInParameterEditor(typeof(YesNoParameterEditor), ""), AddInParameterGroup("Destination")]
+        [AddInParameter("Use email for username"), AddInParameterEditor(typeof(YesNoParameterEditor), "Tooltip=Assigns email adresses as usernames for all imported users. When this option is ON, newly imported users will use the value from AccessUserEmail as the AccessUserUserName. Existing users will not have their user names updated, and will be updated only if the username field is empty"), AddInParameterGroup("Destination")]
         public bool UseEmailForUsername { get; set; }
 
         [AddInParameter("Destination group"), AddInParameterEditor(typeof(UserGroupParameterEditor), ""), AddInParameterGroup("Destination")]
