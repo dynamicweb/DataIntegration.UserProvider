@@ -19,7 +19,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
 
         public UserSourceReader(Mapping mapping, SqlConnection connection, bool exportNotExportedUsers, bool exportNotExportedAfter, DateTime exportNotExportedAfterDate)
         {
-            base.mapping = mapping;
+            base.DoInitialization(mapping, connection);
             _command = new SqlCommand { Connection = connection };
             if (connection.State.ToString() != "Open")
                 connection.Open();
