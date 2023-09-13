@@ -591,31 +591,38 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
             return options;
         }
 
-        private IEnumerable<Mapping> GetMappingsByName(MappingCollection collection, string name)
+        private IEnumerable<Mapping> GetMappingsByName(MappingCollection collection, string name, bool isSourceLookup)
         {
-            return collection.FindAll(map => map.DestinationTable != null && map.DestinationTable.Name == name);
+            if (isSourceLookup)
+            {
+                return collection.FindAll(map => map.SourceTable != null && map.SourceTable.Name == name);
+            }
+            else
+            {
+                return collection.FindAll(map => map.DestinationTable != null && map.DestinationTable.Name == name);
+            }
         }
 
-        private void OrderTablesInJob(Job job)
+        private void OrderTablesInJob(Job job, bool isSourceLookup)
         {
             MappingCollection tables = new MappingCollection();
-            var mappings = GetMappingsByName(job.Mappings, "AccessUserGroup");
+            var mappings = GetMappingsByName(job.Mappings, "AccessUserGroup", isSourceLookup);
             if (mappings != null)
                 tables.AddRange(mappings);
 
-            mappings = GetMappingsByName(job.Mappings, "AccessUser");
+            mappings = GetMappingsByName(job.Mappings, "AccessUser", isSourceLookup);
             if (mappings != null)
                 tables.AddRange(mappings);
 
-            mappings = GetMappingsByName(job.Mappings, "AccessUserAddress");
+            mappings = GetMappingsByName(job.Mappings, "AccessUserAddress", isSourceLookup);
             if (mappings != null)
                 tables.AddRange(mappings);
 
-            mappings = GetMappingsByName(job.Mappings, "AccessUserSecondaryRelation");
+            mappings = GetMappingsByName(job.Mappings, "AccessUserSecondaryRelation", isSourceLookup);
             if (mappings != null)
                 tables.AddRange(mappings);
 
-            mappings = GetMappingsByName(job.Mappings, "SystemFieldValue");
+            mappings = GetMappingsByName(job.Mappings, "SystemFieldValue", isSourceLookup);
             if (mappings != null)
                 tables.AddRange(mappings);
 
@@ -627,7 +634,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
             ReplaceMappingConditionalsWithValuesFromRequest(job);
             if (IsFirstJobRun)
             {
-                OrderTablesInJob(job);
+                OrderTablesInJob(job, false);
             }
             SqlTransaction sqlTransaction = null;
             if (Connection.State.ToString() != "Open")
@@ -745,7 +752,7 @@ namespace Dynamicweb.DataIntegration.Providers.UserProvider
         public override void LoadSettings(Job job)
         {
             this._job = job;
-            OrderTablesInJob(job);
+            OrderTablesInJob(job, true);
         }
 
         public new void Close()
