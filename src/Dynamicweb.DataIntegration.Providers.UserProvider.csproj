@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>10.0.6</Version>
+		<Version>10.0.7</Version>
 		<AssemblyVersion>1.0.0.0</AssemblyVersion>
 		<Description>User Provider</Description>
 	</PropertyGroup>
@@ -22,10 +22,7 @@
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Dynamicweb.Core" Version="10.0.0" />
-		<PackageReference Include="Dynamicweb.DataIntegration" Version="10.0.0" />
-		<PackageReference Include="Dynamicweb.DataIntegration.Providers.SqlProvider" Version="10.0.0" />
-		<PackageReference Include="Dynamicweb.DataIntegration.Providers.XmlProvider" Version="10.0.0" />
+		<PackageReference Include="Dynamicweb.DataIntegration" Version="10.0.9" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
 	</ItemGroup>
 </Project>
