@@ -3,6 +3,7 @@ using Dynamicweb.Security.UserManagement;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Globalization;
 
 namespace Dynamicweb.DataIntegration.Providers.UserProvider;
 
@@ -50,6 +51,7 @@ class UserSourceReader : BaseSqlReader
                 sql = sql + " WHERE " + whereSql;
 
             _command.CommandText = sql;
+            _reader?.Close();
             _reader = _command.ExecuteReader();
         }
         catch (SqlException)
@@ -118,7 +120,7 @@ class UserSourceReader : BaseSqlReader
                     string condition = string.Empty;
                     if (mapping.SourceTable.Name == "AccessUserGroup" || mapping.SourceTable.Name == "AccessUser")
                     {
-                        condition = string.Format("([AccessUserUpdatedOn] > '{0}' )", _exportNotExportedAfterDate.ToString("yyyy-MM-dd HH:mm:ss"));
+                        condition = string.Format("([AccessUserUpdatedOn] > '{0}' )", _exportNotExportedAfterDate.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
                     }
                     else if (mapping.SourceTable.Name == "AccessUserAddress")
                     {
@@ -167,7 +169,7 @@ class UserSourceReader : BaseSqlReader
                 {
                     tableName = "AccessUser";
                 }
-                string sql = string.Format("UPDATE [{0}] SET [{0}Exported] = '{1}'", tableName, exportedDate.ToString("yyyy-MM-dd HH:mm:ss"));
+                string sql = string.Format("UPDATE [{0}] SET [{0}Exported] = '{1}'", tableName, exportedDate.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
                 if (!string.IsNullOrEmpty(kvp.Value))
                 {
                     sql = sql + " WHERE " + kvp.Value;
