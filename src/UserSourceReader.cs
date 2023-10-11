@@ -15,10 +15,8 @@ class UserSourceReader : BaseSqlReader
     private static Dictionary<string, string> _tableNameWhereSqlDictionary = new Dictionary<string, string>();
     private static Dictionary<string, SqlParameterCollection> _tableNameSqlParametersDictionary = new Dictionary<string, SqlParameterCollection>();
 
-    public UserSourceReader(Mapping mapping, SqlConnection connection, bool exportNotExportedUsers, bool exportNotExportedAfter, DateTime exportNotExportedAfterDate)
+    public UserSourceReader(Mapping mapping, SqlConnection connection, bool exportNotExportedUsers, bool exportNotExportedAfter, DateTime exportNotExportedAfterDate) : base(mapping, connection)
     {
-        DoInitialization(mapping, connection);
-
         _command = new SqlCommand { Connection = connection };
         if (connection.State.ToString() != "Open")
             connection.Open();
