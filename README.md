@@ -1,3 +1,3 @@
-# DataIntegration.UserProvider
+# User Provider
 
-Provider for importing and exporting users in Dynamicweb. Abstracts the AccessUser table out separate groups
+Import and export user and user group data in a more straightforward manner than the Dynamicweb provider.
