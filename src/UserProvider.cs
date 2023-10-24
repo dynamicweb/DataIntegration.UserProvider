@@ -253,24 +253,15 @@ public class UserProvider : BaseSqlProvider, IDestination, ISource, IParameterOp
     }
     public override Schema GetOriginalSourceSchema()
     {
-        Schema result = GetSqlSourceSchema(Connection);
-        Table accessUserTable = null;
         List<string> tablestToKeep = new() { "AccessUser", "AccessUserAddress", "AccessUserSecondaryRelation" };
+        Schema result = GetSqlSourceSchema(Connection, tablestToKeep);
+        Table accessUserTable = null;
         SystemFieldCollection systemFields = SystemField.GetSystemFields("AccessUser");
         if (systemFields != null && systemFields.Count > 0)
         {
             tablestToKeep.Add("SystemFieldValue");
         }
-        List<Table> tablesToRemove = new List<Table>();
-        foreach (Table table in result.GetTables())
-        {
-            if (!tablestToKeep.Contains(table.Name))
-                tablesToRemove.Add(table);
-        }
-        foreach (Table table in tablesToRemove)
-        {
-            result.RemoveTable(table);
-        }
+
         foreach (Table table in result.GetTables())
         {
             switch (table.Name)
@@ -710,10 +701,10 @@ public class UserProvider : BaseSqlProvider, IDestination, ISource, IParameterOp
                 //Clear group cache for refreshing users in the groups they were imported
                 UserManagementServices.UserGroups.ClearCache();
             }
-            UnifiedPermissionService service = new UnifiedPermissionService();
+            PermissionService service = new PermissionService();
             foreach (string id in Writer.UpdatedUsers)
             {
-                service.ClearUserCache(id);
+                service.ClearCacheByOwnerId(id);
             }
             UpdateIndex();
         }

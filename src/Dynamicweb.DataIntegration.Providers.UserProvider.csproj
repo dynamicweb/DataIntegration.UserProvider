@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<Version>10.0.8</Version>
+		<Version>10.0.9</Version>
 		<AssemblyVersion>1.0.0.0</AssemblyVersion>
 		<Title>User Provider</Title>
 		<Description>User Provider</Description>
@@ -23,7 +23,7 @@
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Dynamicweb.DataIntegration" Version="10.0.14" />
+		<PackageReference Include="Dynamicweb.DataIntegration" Version="10.0.15" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
 	</ItemGroup>
 </Project>
