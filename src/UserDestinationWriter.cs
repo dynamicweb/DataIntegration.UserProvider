@@ -231,8 +231,7 @@ internal class UserDestinationWriter : BaseSqlWriter
             if (_existingUsers == null)
             {
                 //create the data adapter 
-                SqlDataAdapter usersDataAdapter = new SqlDataAdapter("select * from AccessUser where AccessUserType NOT IN (2, 11)",
-                                                                                     _sqlCommand.Connection);
+                SqlDataAdapter usersDataAdapter = new SqlDataAdapter("select * from AccessUser", _sqlCommand.Connection);
                 if (_sqlCommand.Transaction != null)
                     usersDataAdapter.SelectCommand.Transaction = _sqlCommand.Transaction;
                 // create the DataSet 
@@ -470,7 +469,7 @@ internal class UserDestinationWriter : BaseSqlWriter
         {
             object rowValue = null;
             bool hasValueInRow = row.TryGetValue(columnMapping.SourceColumn?.Name, out rowValue);
-            if (columnMapping.HasScriptWithValue || hasValueInRow)                    
+            if (columnMapping.HasScriptWithValue || hasValueInRow)
             {
                 object evaluatedValue = columnMapping.ConvertInputValueToOutputValue(rowValue);
 
@@ -1476,7 +1475,7 @@ internal class UserDestinationWriter : BaseSqlWriter
                             tmpl.SetTag("DWUsers:User:Username", user.UserName);
                             tmpl.SetTag("DWUsers:User:Password", user.Password);
                             tmpl.SetTag("DWUsers:User:Name", user.Name);
-                            tmpl.SetTag("DWUsers:User:Email", user.Email);                                
+                            tmpl.SetTag("DWUsers:User:Email", user.Email);
 
                             if (!string.IsNullOrEmpty(user.Country))
                             {
