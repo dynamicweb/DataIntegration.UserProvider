@@ -876,7 +876,10 @@ internal class UserDestinationWriter : BaseSqlWriter
             }
 
             sqlCommand.CommandText = sqlClean.ToString();
-            RowsAffected += sqlCommand.ExecuteNonQuery();
+            var rowsAffected = sqlCommand.ExecuteNonQuery();
+            RowsAffected += rowsAffected;
+            if (rowsAffected > 0)
+                _logger.Log($"The number of deleted rows: {rowsAffected} for the destination {mapping.DestinationTable.Name} table mapping");
         }
         catch (Exception ex)
         {
@@ -1142,7 +1145,10 @@ internal class UserDestinationWriter : BaseSqlWriter
             }
 
             _sqlCommand.CommandText = sqlUpdateInsert;
-            RowsAffected += _sqlCommand.ExecuteNonQuery();
+            var rowsAffected = _sqlCommand.ExecuteNonQuery();
+            RowsAffected += rowsAffected;
+            if (rowsAffected > 0)
+                _logger.Log($"The number of rows affected: {rowsAffected} in the {mapping.DestinationTable.Name} table");
         }
         catch (Exception ex)
         {
