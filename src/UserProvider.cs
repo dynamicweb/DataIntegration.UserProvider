@@ -736,11 +736,8 @@ public class UserProvider : BaseSqlProvider, IDestination, ISource, IParameterOp
         }
         finally
         {
-            if (exception != null)
-            {
-                if (Writer != null)
-                    Writer.Close();
-            }
+            if (Writer != null)
+                Writer.Close();
             sourceRow = null;
         }
         if (IsFirstJobRun)
@@ -875,7 +872,7 @@ public class UserProvider : BaseSqlProvider, IDestination, ISource, IParameterOp
 
     public IEnumerable<ParameterOption> GetParameterOptions(string parameterName)
     {
-        switch(parameterName)
+        switch (parameterName)
         {
             case "Repositories index update":
                 return GetRepositoryIndexOptions();

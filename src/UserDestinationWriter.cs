@@ -1161,7 +1161,7 @@ internal class UserDestinationWriter : BaseSqlWriter
         foreach (DataTable table in DataToWrite.Tables)
         {
             string tableName = GetTableNameWithoutPrefix(table.TableName) + "TempTableForBulkImport" + GetPrefixFromTableName(table.TableName);
-            _sqlCommand.CommandText = "if exists (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'" + tableName + "') AND type in (N'U')) drop table " + tableName;
+            _sqlCommand.CommandText = $"if exists (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'{tableName}') AND type in (N'U')) drop table [{tableName}]";            
             _sqlCommand.ExecuteNonQuery();
         }
         GroupHierarchyItemsList = null;
