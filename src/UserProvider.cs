@@ -20,7 +20,7 @@ using System.Xml.Linq;
 namespace Dynamicweb.DataIntegration.Providers.UserProvider;
 
 [AddInName("Dynamicweb.DataIntegration.Providers.Provider"), AddInLabel("User Provider"), AddInDescription("User provider"), AddInIgnore(false)]
-public class UserProvider : BaseSqlProvider, IDestination, ISource, IParameterOptions
+public class UserProvider : BaseSqlProvider, IParameterOptions
 {
     private Job _job = null;
     private UserDestinationWriter Writer = null;
@@ -501,11 +501,13 @@ public class UserProvider : BaseSqlProvider, IDestination, ISource, IParameterOp
         }
         return result;
     }
+
     public override string ValidateSourceSettings()
     {
         return null;
     }
-    public new virtual void SaveAsXml(XmlTextWriter xmlTextWriter)
+
+    public override void SaveAsXml(XmlTextWriter xmlTextWriter)
     {
         xmlTextWriter.WriteElementString("SqlConnectionString", SqlConnectionString);
         xmlTextWriter.WriteElementString("UserKeyField", UserKeyField);
@@ -531,6 +533,7 @@ public class UserProvider : BaseSqlProvider, IDestination, ISource, IParameterOp
         xmlTextWriter.WriteElementString("SkipFailingRows", SkipFailingRows.ToString(CultureInfo.CurrentCulture));
         GetSchema().SaveAsXml(xmlTextWriter);
     }
+
     public override void UpdateSourceSettings(ISource source)
     {
         UserProvider newProvider = (UserProvider)source;
@@ -564,11 +567,13 @@ public class UserProvider : BaseSqlProvider, IDestination, ISource, IParameterOp
         DestinationServerSSPI = newProvider.DestinationServerSSPI;
         Catalog = newProvider.Catalog;
     }
+
     public override void UpdateDestinationSettings(IDestination destination)
     {
         ISource newProvider = (ISource)destination;
         UpdateSourceSettings(newProvider);
     }
+
     public override string Serialize()
     {
         XDocument document = new XDocument(new XDeclaration("1.0", "utf-8", string.Empty));
@@ -607,32 +612,38 @@ public class UserProvider : BaseSqlProvider, IDestination, ISource, IParameterOp
         return document.ToString();
     }
 
-
-    private IEnumerable<Mapping> GetMappingsByName(MappingCollection collection, string name)
+    private static IEnumerable<Mapping> GetMappingsByName(MappingCollection collection, string name, bool isSource)
     {
-        return collection.FindAll(map => map.DestinationTable != null && map.DestinationTable.Name == name);
+        if (isSource)
+        {
+            return collection.FindAll(map => map.SourceTable != null && map.SourceTable.Name == name);
+        }
+        else
+        {
+            return collection.FindAll(map => map.DestinationTable != null && map.DestinationTable.Name == name);
+        }
     }
 
-    private void OrderTablesInJob(Job job)
+    public override void OrderTablesInJob(Job job, bool isSource)
     {
         MappingCollection tables = new MappingCollection();
-        var mappings = GetMappingsByName(job.Mappings, "AccessUserGroup");
+        var mappings = GetMappingsByName(job.Mappings, "AccessUserGroup", isSource);
         if (mappings != null)
             tables.AddRange(mappings);
 
-        mappings = GetMappingsByName(job.Mappings, "AccessUser");
+        mappings = GetMappingsByName(job.Mappings, "AccessUser", isSource);
         if (mappings != null)
             tables.AddRange(mappings);
 
-        mappings = GetMappingsByName(job.Mappings, "AccessUserAddress");
+        mappings = GetMappingsByName(job.Mappings, "AccessUserAddress", isSource);
         if (mappings != null)
             tables.AddRange(mappings);
 
-        mappings = GetMappingsByName(job.Mappings, "AccessUserSecondaryRelation");
+        mappings = GetMappingsByName(job.Mappings, "AccessUserSecondaryRelation", isSource);
         if (mappings != null)
             tables.AddRange(mappings);
 
-        mappings = GetMappingsByName(job.Mappings, "SystemFieldValue");
+        mappings = GetMappingsByName(job.Mappings, "SystemFieldValue", isSource);
         if (mappings != null)
             tables.AddRange(mappings);
 
@@ -644,7 +655,7 @@ public class UserProvider : BaseSqlProvider, IDestination, ISource, IParameterOp
         ReplaceMappingConditionalsWithValuesFromRequest(job);
         if (IsFirstJobRun)
         {
-            OrderTablesInJob(job);
+            OrderTablesInJob(job, false);
         }
         SqlTransaction sqlTransaction = null;
         if (Connection.State.ToString() != "Open")
@@ -750,7 +761,7 @@ public class UserProvider : BaseSqlProvider, IDestination, ISource, IParameterOp
         return true;
     }
 
-    public new ISourceReader GetReader(Mapping mapping)
+    public override ISourceReader GetReader(Mapping mapping)
     {
         return new UserSourceReader(mapping, Connection, ExportNotExportedUsers, ExportNotExportedAfter, ExportNotExportedAfterDate);
     }
@@ -758,10 +769,10 @@ public class UserProvider : BaseSqlProvider, IDestination, ISource, IParameterOp
     public override void LoadSettings(Job job)
     {
         _job = job;
-        OrderTablesInJob(job);
+        OrderTablesInJob(job, true);
     }
 
-    public new void Close()
+    public override void Close()
     {
         if (_job != null && _job.Result == JobResult.Completed)
             UserSourceReader.UpdateExportedDataInDb(connection);
@@ -856,15 +867,6 @@ public class UserProvider : BaseSqlProvider, IDestination, ISource, IParameterOp
         }
     }
 
-    #region IDestination Members
-
-    List<SchemaComparerResult> IDestination.CheckMapping(Mapping map)
-    {
-        return new List<SchemaComparerResult>();
-    }
-
-    #endregion
-
     private void UpdateIndex()
     {
         if (!string.IsNullOrEmpty(RepositoriesIndexUpdate))
@@ -875,7 +877,7 @@ public class UserProvider : BaseSqlProvider, IDestination, ISource, IParameterOp
 
     public IEnumerable<ParameterOption> GetParameterOptions(string parameterName)
     {
-        switch(parameterName)
+        switch (parameterName)
         {
             case "Repositories index update":
                 return GetRepositoryIndexOptions();
