@@ -612,7 +612,7 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
         return document.ToString();
     }
 
-    private IEnumerable<Mapping> GetMappingsByName(MappingCollection collection, string name, bool isSource)
+    private static IEnumerable<Mapping> GetMappingsByName(MappingCollection collection, string name, bool isSource)
     {
         if (isSource)
         {
