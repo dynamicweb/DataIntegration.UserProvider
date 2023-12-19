@@ -1161,7 +1161,7 @@ internal class UserDestinationWriter : BaseSqlWriter
         foreach (DataTable table in DataToWrite.Tables)
         {
             string tableName = GetTableNameWithoutPrefix(table.TableName) + "TempTableForBulkImport" + GetPrefixFromTableName(table.TableName);
-            _sqlCommand.CommandText = "if exists (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'" + tableName + "') AND type in (N'U')) drop table " + tableName;
+            _sqlCommand.CommandText = $"if exists (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'{tableName}') AND type in (N'U')) drop table [{tableName}]";            
             _sqlCommand.ExecuteNonQuery();
         }
         GroupHierarchyItemsList = null;
@@ -1315,7 +1315,7 @@ internal class UserDestinationWriter : BaseSqlWriter
                     if (userGroupsRelations[userColumnUserValuePair].Count > 0)
                     {
                         var groupIds = userGroupsRelations[userColumnUserValuePair];
-                        _sqlCommand.CommandText += $"insert into AccessUserGroupRelation (AccessUserGroupRelationUserId, AccessUserGroupRelationGroupId) " +
+                        _sqlCommand.CommandText = $"insert into AccessUserGroupRelation (AccessUserGroupRelationUserId, AccessUserGroupRelationGroupId) " +
                             $"SELECT a.AccessUserId, g.GroupId FROM AccessUser AS a " +
                             $"CROSS JOIN ( SELECT AccessUserId AS GroupId FROM AccessUser WHERE AccessUserId IN ({string.Join(",", groupIds)}) ) AS g " +
                             $"WHERE {userColumnUserValuePair.Item1} = {userColumnUserValuePair.Item2} " +
@@ -1359,7 +1359,7 @@ internal class UserDestinationWriter : BaseSqlWriter
                                 if ((i > 0 && i % 1000 == 0) || i == usersArr.Length - 1)
                                 {
 
-                                    _sqlCommand.CommandText += $"insert into AccessUserGroupRelation (AccessUserGroupRelationUserId, AccessUserGroupRelationGroupId) " +
+                                    _sqlCommand.CommandText = $"insert into AccessUserGroupRelation (AccessUserGroupRelationUserId, AccessUserGroupRelationGroupId) " +
                                         $"SELECT AccessUserId, {groupId} from AccessUser WHERE {column} IN ({users.ToString().TrimStart(new char[] { ',' })}) " +
                                         $"AND NOT EXISTS ( SELECT 1 FROM AccessUserGroupRelation WHERE AccessUserGroupRelationUserId = AccessUserId AND AccessUserGroupRelationGroupId = {groupId} );";
                                     //_sqlCommand.CommandText = string.Format("update AccessUser set AccessUserGroups=IsNull(AccessUserGroups, '')+'@{0}@' where {1} IN ({2}) and (not AccessUserGroups like '%@{0}@%' or AccessUserGroups is null);",

@@ -747,11 +747,8 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
         }
         finally
         {
-            if (exception != null)
-            {
-                if (Writer != null)
-                    Writer.Close();
-            }
+            if (Writer != null)
+                Writer.Close();
             sourceRow = null;
         }
         if (IsFirstJobRun)
