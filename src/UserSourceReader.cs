@@ -12,11 +12,16 @@ class UserSourceReader : BaseSqlReader
     private bool _exportNotExportedUsers;
     private bool _exportNotExportedAfter;
     private DateTime _exportNotExportedAfterDate;
+    private string _sourceGroup;
 
     private static Dictionary<string, string> _tableNameWhereSqlDictionary = new Dictionary<string, string>();
     private static Dictionary<string, SqlParameterCollection> _tableNameSqlParametersDictionary = new Dictionary<string, SqlParameterCollection>();
 
-    public UserSourceReader(Mapping mapping, SqlConnection connection, bool exportNotExportedUsers, bool exportNotExportedAfter, DateTime exportNotExportedAfterDate) : base(mapping, connection)
+    public UserSourceReader(Mapping mapping, SqlConnection connection, bool exportNotExportedUsers, bool exportNotExportedAfter, DateTime exportNotExportedAfterDate) : this(mapping, connection, exportNotExportedUsers, exportNotExportedAfter, exportNotExportedAfterDate, "")
+    {
+    }
+
+    public UserSourceReader(Mapping mapping, SqlConnection connection, bool exportNotExportedUsers, bool exportNotExportedAfter, DateTime exportNotExportedAfterDate, string sourceGroup) : base(mapping, connection)
     {
         _command = new SqlCommand { Connection = connection };
         if (connection.State.ToString() != "Open")
@@ -25,6 +30,7 @@ class UserSourceReader : BaseSqlReader
         _exportNotExportedUsers = exportNotExportedUsers;
         _exportNotExportedAfter = exportNotExportedAfter;
         _exportNotExportedAfterDate = exportNotExportedAfterDate;
+        _sourceGroup = sourceGroup;
 
         string whereSql = GetWhereSql();
         if (mapping.SourceTable != null && mapping.SourceTable.Name != "AccessUserSecondaryRelation" && mapping.SourceTable.Name != "SystemFieldValue")
@@ -47,8 +53,26 @@ class UserSourceReader : BaseSqlReader
 
             string sql = "SELECT " + GetColumns() + " FROM  " + GetFromTables();
 
-            if (!string.IsNullOrEmpty(whereSql))
-                sql = sql + " WHERE " + whereSql;
+            string sqlGroupWhereClause = "";
+
+            if (mapping.SourceTable != null && mapping.SourceTable.Name.Equals("AccessUser", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(_sourceGroup))
+            {
+                sql += " left outer join AccessUserGroupRelation on AccessUserGroupRelation.AccessUserGroupRelationUserId = AccessUser.AccessUserId ";
+                sqlGroupWhereClause = $" AccessUserGroupRelation.AccessUserGroupRelationGroupId = {_sourceGroup} ";
+            }
+
+            if (!string.IsNullOrEmpty(whereSql) && !string.IsNullOrEmpty(sqlGroupWhereClause))
+            {
+                sql += $" WHERE {whereSql} AND {sqlGroupWhereClause}";
+            }
+            else if (string.IsNullOrEmpty(whereSql) && !string.IsNullOrEmpty(sqlGroupWhereClause))
+            {
+                sql += $" WHERE {sqlGroupWhereClause}";
+            }
+            else if (!string.IsNullOrEmpty(whereSql) && string.IsNullOrEmpty(sqlGroupWhereClause))
+            {
+                sql += $" WHERE {whereSql}";
+            }
 
             _command.CommandText = sql;
             _reader?.Close();
