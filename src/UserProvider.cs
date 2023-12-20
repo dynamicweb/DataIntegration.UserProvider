@@ -54,6 +54,10 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
         set { _sqlConnectionString = value; }
     }
 
+
+    [AddInParameter("Source group"), AddInParameterEditor(typeof(UserGroupParameterEditor), ""), AddInParameterGroup("Source")]
+    public string SourceGroup { get; set; }
+
     [AddInParameter("Export users created and edited since last export"), AddInLabel("Export users created or edited since last export"), AddInParameterEditor(typeof(YesNoParameterEditor), ""), AddInParameterGroup("Source")]
     public virtual bool ExportNotExportedUsers { get; set; }
 
@@ -407,6 +411,12 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
                         DestinationGroup = node.FirstChild.Value;
                     }
                     break;
+                case "SourceGroup":
+                    if (node.FirstChild != null && node.FirstChild.Value != null)
+                    {
+                        SourceGroup = node.FirstChild.Value;
+                    }
+                    break;
                 case "MailSubject":
                     if (node.FirstChild != null && node.FirstChild.Value != null)
                     {
@@ -509,6 +519,7 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
 
     public override void SaveAsXml(XmlTextWriter xmlTextWriter)
     {
+        xmlTextWriter.WriteElementString("SourceGroup", SourceGroup);
         xmlTextWriter.WriteElementString("SqlConnectionString", SqlConnectionString);
         xmlTextWriter.WriteElementString("UserKeyField", UserKeyField);
         xmlTextWriter.WriteElementString("RemoveMissingUsers", RemoveMissingUsers.ToString(CultureInfo.CurrentCulture));
@@ -547,6 +558,7 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
         RemoveMissingAddresses = newProvider.RemoveMissingAddresses;
         UseEmailForUsername = newProvider.UseEmailForUsername;
         DestinationGroup = newProvider.DestinationGroup;
+        SourceGroup = newProvider.SourceGroup;
         MailSubject = newProvider.MailSubject;
         SenderEmail = newProvider.SenderEmail;
         EmailTemplate = newProvider.EmailTemplate;
@@ -591,6 +603,7 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
         root.Add(CreateParameterNode(GetType(), "Remove missing addresses", RemoveMissingAddresses.ToString(CultureInfo.CurrentCulture)));
         root.Add(CreateParameterNode(GetType(), "Use email for username", UseEmailForUsername.ToString(CultureInfo.CurrentCulture)));
         root.Add(CreateParameterNode(GetType(), "Destination group", DestinationGroup));
+        root.Add(CreateParameterNode(GetType(), "Source group", SourceGroup));
         if (!string.IsNullOrEmpty(MailSubject))
             root.Add(CreateParameterNode(GetType(), "Mail Subject", MailSubject.ToString(CultureInfo.CurrentCulture)));
         if (!string.IsNullOrEmpty(SenderEmail))
@@ -760,7 +773,7 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
 
     public override ISourceReader GetReader(Mapping mapping)
     {
-        return new UserSourceReader(mapping, Connection, ExportNotExportedUsers, ExportNotExportedAfter, ExportNotExportedAfterDate);
+        return new UserSourceReader(mapping, Connection, ExportNotExportedUsers, ExportNotExportedAfter, ExportNotExportedAfterDate, SourceGroup);
     }
 
     public override void LoadSettings(Job job)
