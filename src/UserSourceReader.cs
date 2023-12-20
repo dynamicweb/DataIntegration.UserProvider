@@ -65,11 +65,11 @@ class UserSourceReader : BaseSqlReader
             {
                 sql += $" WHERE {whereSql} AND {sqlGroupWhereClause}";
             }
-            else if (string.IsNullOrEmpty(whereSql) && !string.IsNullOrEmpty(sqlGroupWhereClause))
+            else if (!string.IsNullOrEmpty(sqlGroupWhereClause))
             {
                 sql += $" WHERE {sqlGroupWhereClause}";
             }
-            else if (!string.IsNullOrEmpty(whereSql) && string.IsNullOrEmpty(sqlGroupWhereClause))
+            else if (!string.IsNullOrEmpty(whereSql))
             {
                 sql += $" WHERE {whereSql}";
             }
