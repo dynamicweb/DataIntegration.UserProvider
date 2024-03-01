@@ -29,6 +29,7 @@ internal class UserDestinationWriter : BaseSqlWriter
     private readonly bool _encryptUserPasswords;
     private readonly UserPasswordHashAlgorithm _userPasswordHashAlgorithm;
     private readonly bool _removeMissingGroups;
+    private List<int> _groupsWhereSubGroupsAreImported = new List<int>();
     private readonly bool _removeMissingImpersonation;
     private readonly bool _removeMissingAddresses;
     private bool _useEmailForUsername;
@@ -656,22 +657,25 @@ internal class UserDestinationWriter : BaseSqlWriter
                         dataRow["AccessUserType"] = _GroupUserType;
                     }
                 }
-                if (columnMappings.Find(cm => string.Compare(cm.DestinationColumn.Name, "AccessUserParentID", true) == 0) != null)
+                if (columnMappings.Find(cm => string.Equals(cm.DestinationColumn.Name, "AccessUserParentID", StringComparison.OrdinalIgnoreCase)) != null &&
+                        dataRow["AccessUserParentID"] != DBNull.Value)
                 {
-                    if (dataRow["AccessUserParentID"] != DBNull.Value)
-                    {
-                        string parentGroupIDValue = (string)dataRow["AccessUserParentID"];
+                    string parentGroupIDValue = (string)dataRow["AccessUserParentID"];
+                    int groupId = Converter.ToInt32(parentGroupIDValue);
+                    //Look for existing groups by Parent ID
+                    bool isExistingGroup = groupId > 0 && ExistingUserGroupIDs.ContainsKey(parentGroupIDValue);
 
-                        if (Converter.ToInt32(parentGroupIDValue) > 0 && ExistingUserGroupIDs.ContainsKey(parentGroupIDValue))//Look for existing groups by Parent ID
+                    if (!isExistingGroup)
+                    {
+                        //Look for existing groups by Parent Name
+                        if (!string.IsNullOrEmpty(parentGroupIDValue) && ExistingUserGroups.ContainsKey(parentGroupIDValue))
                         {
-                            dataRow["AccessUserParentID"] = parentGroupIDValue;
+                            groupId = (int)((DataRow)ExistingUserGroups[parentGroupIDValue])["AccessUserID"];
+                            dataRow["AccessUserParentID"] = groupId.ToString();
                         }
-                        else if (!string.IsNullOrEmpty(parentGroupIDValue) && ExistingUserGroups.ContainsKey(parentGroupIDValue))//Look for existing groups by Parent Name
+                        else
                         {
-                            dataRow["AccessUserParentID"] = ((DataRow)ExistingUserGroups[parentGroupIDValue])["AccessUserID"].ToString();
-                        }
-                        else//In this case it is Non existing group, or Group with empty ParentGroup(root group)
-                        {
+                            //In this case it is Non existing group, or Group with empty ParentGroup(root group)
                             //Fill HierarchyItems list with GroupName/ParentGroupName - to search by name after Group Insert
                             if (!string.IsNullOrEmpty(parentGroupIDValue) && !string.IsNullOrEmpty(groupName))
                             {
@@ -681,9 +685,9 @@ internal class UserDestinationWriter : BaseSqlWriter
                             dataRow["AccessUserParentID"] = "0";
                         }
                     }
-                    else
+                    if (_removeMissingGroups && groupId > 0)
                     {
-                        dataRow["AccessUserParentID"] = "0";
+                        _groupsWhereSubGroupsAreImported.Add(groupId);
                     }
                 }
                 break;
@@ -822,6 +826,8 @@ internal class UserDestinationWriter : BaseSqlWriter
 
     private void DeleteExcessFromMainTable(Mapping mapping, string extraConditions, SqlCommand sqlCommand, bool deactivate)
     {
+        StringBuilder sqlClean = new StringBuilder();
+
         string destinationTableName = mapping.DestinationTable.Name;
         string tempTableName = destinationTableName;
         if (mapping.DestinationTable.Name == "AccessUserGroup")
@@ -829,19 +835,30 @@ internal class UserDestinationWriter : BaseSqlWriter
             //Groups should be deleted from the same table as Users - AccessUser from AccessUserGroup temp table
             destinationTableName = "AccessUser";
             tempTableName = "AccessUserGroup";
+
+            if (_removeMissingGroups && _groupsWhereSubGroupsAreImported.Any())
+            {
+                // Find sub groups that needs to be deleted from the parent groups
+                sqlClean.Append(
+                    " WITH users AS ( " +
+                    $" SELECT [AccessUserId], [AccessUserParentId] FROM [AccessUser] WHERE [AccessUserParentId] = 0 and AccessUserType IN (2,11) and [AccessUserId] in ({string.Join(",", _groupsWhereSubGroupsAreImported.Distinct())}) " +
+                    " UNION ALL " +
+                    " SELECT c.[AccessUserId], c.[AccessUserParentId] FROM [AccessUser] c INNER JOIN users u ON c.[AccessUserParentId] = u.[AccessUserId]  WHERE c.[AccessUserType] IN (2,11) " +
+                    ") ");
+                extraConditions += " and [AccessUserParentId] in (SELECT [AccessUserId] FROM users) ";
+            }
         }
 
         try
-        {
-            StringBuilder sqlClean = null;
+        {            
             if (deactivate &&
                 string.Compare(mapping.DestinationTable.Name, "AccessUser", StringComparison.OrdinalIgnoreCase) == 0)
-            {
-                sqlClean = new StringBuilder($"UPDATE [AccessUser] SET AccessUserActive = 0");
+            {                
+                sqlClean.Append($"UPDATE [AccessUser] SET AccessUserActive = 0");
             }
             else
-            {
-                sqlClean = new StringBuilder($"DELETE FROM [{mapping.DestinationTable.SqlSchema}].[{destinationTableName}]");
+            {                
+                sqlClean.Append($"DELETE FROM [{mapping.DestinationTable.SqlSchema}].[{destinationTableName}]");
             }
             sqlClean.Append($" WHERE NOT EXISTS  (SELECT * FROM [{mapping.DestinationTable.SqlSchema}].[{tempTableName}TempTableForBulkImport{mapping.GetId()}] where ");
 
@@ -1172,6 +1189,7 @@ internal class UserDestinationWriter : BaseSqlWriter
         _groupsWhereUsersAreImported = null;
         duplicateRowsHandler = null;
         UpdatedUsers = null;
+        _groupsWhereSubGroupsAreImported = null;
     }
 
     private void UpdateGroupHierarchy(SqlTransaction sqlTransaction)
