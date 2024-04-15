@@ -863,13 +863,13 @@ internal class UserDestinationWriter : BaseSqlWriter
             sqlClean.Append($" WHERE NOT EXISTS  (SELECT * FROM [{mapping.DestinationTable.SqlSchema}].[{tempTableName}TempTableForBulkImport{mapping.GetId()}] where ");
 
             var columnMappings = mapping.GetColumnMappings();
-            bool isPrimaryKeyColumnExists = columnMappings.Any(cm => cm.Active && ((SqlColumn)cm.DestinationColumn).IsPrimaryKey);
+            bool isPrimaryKeyColumnExists = columnMappings.IsKeyColumnExists();
             foreach (ColumnMapping columnMapping in columnMappings)
             {
                 if (columnMapping.Active)
                 {
                     SqlColumn column = (SqlColumn)columnMapping.DestinationColumn;
-                    if (column.IsPrimaryKey || !isPrimaryKeyColumnExists)
+                    if (column.IsKeyColumn(columnMappings) || !isPrimaryKeyColumnExists)
                     {
                         sqlClean.Append($"[{mapping.DestinationTable.SqlSchema}].[{destinationTableName}].[{column.Name}]=[{column.Name}] AND ");
                     }
@@ -1092,8 +1092,8 @@ internal class UserDestinationWriter : BaseSqlWriter
         {
             string sqlConditions = "";
             string firstKey = "";
-            var columnMappings = mapping.GetColumnMappings();
-            bool isPrimaryKeyColumnExists = columnMappings.Any(cm => cm.Active && ((SqlColumn)cm.DestinationColumn).IsPrimaryKey);
+            var columnMappings = mapping.GetColumnMappings();            
+            bool isPrimaryKeyColumnExists = columnMappings.IsKeyColumnExists();
             if (UseAutoSearching && !isPrimaryKeyColumnExists && mapping.DestinationTable.Name != "AccessUserGroup" && mapping.DestinationTable.Name != "AccessUserAddress")
             {
                 sqlConditions = sqlConditions + "[" + mapping.DestinationTable.SqlSchema + "].[" +
@@ -1109,7 +1109,7 @@ internal class UserDestinationWriter : BaseSqlWriter
                     if (columnMapping.Active)
                     {
                         SqlColumn column = (SqlColumn)columnMapping.DestinationColumn;
-                        if (column.IsPrimaryKey || (!isPrimaryKeyColumnExists && !columnMapping.ScriptValueForInsert))
+                        if (column.IsKeyColumn(columnMappings) || (!isPrimaryKeyColumnExists && !columnMapping.ScriptValueForInsert))
                         {
                             sqlConditions = sqlConditions + "[" + mapping.DestinationTable.SqlSchema + "].[" +
                                                   destinationTableName + "].[" + columnMapping.DestinationColumn.Name + "]=[" +
@@ -1132,7 +1132,7 @@ internal class UserDestinationWriter : BaseSqlWriter
                 if (columnMapping.Active)
                 {
                     insertColumns.Add("[" + columnMapping.DestinationColumn.Name + "]");
-                    if (!((SqlColumn)columnMapping.DestinationColumn).IsIdentity && !((SqlColumn)columnMapping.DestinationColumn).IsPrimaryKey && !columnMapping.ScriptValueForInsert)
+                    if (!((SqlColumn)columnMapping.DestinationColumn).IsIdentity && !((SqlColumn)columnMapping.DestinationColumn).IsKeyColumn(columnMappings) && !columnMapping.ScriptValueForInsert)
                         updateColumnList.Add("[" + columnMapping.DestinationColumn.Name + "]=[" + mapping.DestinationTable.SqlSchema + "].[" + tempTableName + "TempTableForBulkImport" + mapping.GetId() + "].[" + columnMapping.DestinationColumn.Name + "]");
                     insertSelectList.Add("[" + tempTableName + "TempTableForBulkImport" + mapping.GetId() + "].[" + columnMapping.DestinationColumn.Name + "]");
                 }
