@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Globalization;
+using System.Linq;
 
 namespace Dynamicweb.DataIntegration.Providers.UserProvider;
 
@@ -174,6 +175,49 @@ class UserSourceReader : BaseSqlReader
             conditionalsSql += "[SystemFieldValueTableName] = 'AccessUser'";
         }
         return conditionalsSql;
+    }
+
+    protected override string GetColumns()
+    {
+        string result = string.Empty;
+        if (mapping.SourceTable != null && (mapping.SourceTable.Name == "AccessUserGroup" || mapping.SourceTable.Name == "AccessUserAddress"))
+        {
+            if (mapping.SourceTable.Name == "AccessUserGroup")
+            {
+                result = mapping.GetColumnMappings().Aggregate("",
+                    (current, fm) => (fm.SourceColumn != null) ?
+                        current + "[" + UserProvider.GetOriginalColumnNameForGroups(fm.SourceColumn.Name) + "] AS [" + fm.SourceColumn.Name + "], " : current);
+            }
+            else
+            {
+                result = mapping.GetColumnMappings().Aggregate("", (current, fm) => (fm.SourceColumn != null) ?
+                    current + (fm.SourceColumn.Name == "AccessUserAddressUserID" ? "CAST([AccessUserAddressUserID] AS NVARCHAR) AS [AccessUserAddressUserID], " : "[" + fm.SourceColumn.Name + "], ")
+                    : current);
+            }
+            result = result.Substring(0, result.Length - 2);
+        }
+        else
+        {
+            return base.GetColumns();
+        }
+        return result;
+    }
+
+    protected override string GetFromTables()
+    {
+        string result = "[" + mapping.SourceTable.SqlSchema + "].[" + mapping.SourceTable.Name + "] ";
+        switch (mapping.SourceTable.Name)
+        {
+            case "AccessUserAddress":
+                result = result + " INNER JOIN [AccessUser] on [AccessUserAddress].[AccessUserAddressUserID] = [AccessUser].[AccessUserID]";
+                break;
+            case "AccessUserGroup":
+                result = "[" + mapping.SourceTable.SqlSchema + "].[AccessUser] ";
+                break;
+            default:
+                break;
+        }
+        return result;
     }
 
     internal static void UpdateExportedDataInDb(SqlConnection connection)
