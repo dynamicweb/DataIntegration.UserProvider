@@ -975,22 +975,22 @@ internal class UserDestinationWriter : BaseSqlWriter
                     if (!updateUsersByCustomerNumberMode && accessUserColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserUserName") == null)
                     {
                         accessUserMapping.AddMapping(randomColumn,
-                            _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserUserName"), false);
+                            _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserUserName"), true);
                     }
                     if (!updateUsersByCustomerNumberMode && accessUserColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserPassword") == null)
                     {
                         accessUserMapping.AddMapping(randomColumn,
-                            _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserPassword"), false);
+                            _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserPassword"), true);
                     }
                     if (accessUserColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserActive") == null)
                     {
                         accessUserMapping.AddMapping(randomColumn,
-                            _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserActive"), false);
+                            _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserActive"), true);
                     }
                     if (accessUserColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserType") == null)
                     {
                         accessUserMapping.AddMapping(randomColumn,
-                            _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserType"), false);
+                            _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserType"), true);
                     }
                     if (_allowEmail && accessUserColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserNewsletterAllowed") == null)
                     {
@@ -1031,22 +1031,22 @@ internal class UserDestinationWriter : BaseSqlWriter
                     if (groupColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserUserName") == null)
                     {
                         groupMapping.AddMapping(randomColumn,
-                            _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserUserName"), false);
+                            _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserUserName"), true);
                     }
                     if (groupColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserName") == null)
                     {
                         groupMapping.AddMapping(randomColumn,
-                            _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserName"), false);
+                            _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserName"), true);
                     }
                     if (groupColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserActive") == null)
                     {
                         groupMapping.AddMapping(randomColumn,
-                            _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserActive"), false);
+                            _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserActive"), true);
                     }
                     if (groupColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserType") == null)
                     {
                         groupMapping.AddMapping(randomColumn,
-                            _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserType"), false);
+                            _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserType"), true);
                     }
                 }
             }
@@ -1057,7 +1057,7 @@ internal class UserDestinationWriter : BaseSqlWriter
             {
                 if (mapping != null)
                 {
-                    mapping.AddMapping(randomColumn, _schemaTables.Find(t => t.Name == "SystemFieldValue").Columns.Find(c => c.Name == "SystemFieldValueTableName"), false);
+                    mapping.AddMapping(randomColumn, _schemaTables.Find(t => t.Name == "SystemFieldValue").Columns.Find(c => c.Name == "SystemFieldValueTableName"), true);
                 }
             }
         }
