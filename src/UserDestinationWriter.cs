@@ -1422,6 +1422,7 @@ internal class UserDestinationWriter : BaseSqlWriter
         if (DataToWrite.Tables[GetTableName("AccessUserAddress", mapping)] != null && DataToWrite.Tables[GetTableName("AccessUserAddress", mapping)].Rows.Count > 0 &&
             ExistingUsers.Rows.Count > 0)
         {
+            Hashtable processedIds = new Hashtable();
             _sqlCommand.Transaction = sqlTransaction;
             StringBuilder updateUserIdSql = new StringBuilder();
             foreach (DataRow row in DataToWrite.Tables[GetTableName("AccessUserAddress", mapping)].Rows)
@@ -1429,24 +1430,32 @@ internal class UserDestinationWriter : BaseSqlWriter
                 if (row["AccessUserAddressUserID"] != DBNull.Value && !string.IsNullOrEmpty(row["AccessUserAddressUserID"].ToString()))
                 {
                     string sourceUserId = row["AccessUserAddressUserID"].ToString();
-                    //search existing userId by Id and if not found by UserName/column selected in "userKeyField" drop-down list
-                    int existingUserId = GetExistingUserID(sourceUserId);
 
-                    if (existingUserId > 0)
+                    if (!processedIds.ContainsKey(sourceUserId))
                     {
-                        updateUserIdSql.AppendFormat("update AccessUserAddressTempTableForBulkImport{0} set AccessUserAddressUserID='{1}' where AccessUserAddressUserID='{2}';",
-                                mapping.GetId(), existingUserId.ToString(), sourceUserId);
-                    }
-                    else
-                    {
-                        //User not found, write to log                            
-                        if (row.Table.Columns.Contains("AccessUserAddressName") && row["AccessUserAddressName"] != DBNull.Value && !string.IsNullOrEmpty(row["AccessUserAddressName"].ToString()))
+                        processedIds.Add(sourceUserId, null);
+                        //search existing userId by Id and if not found by UserName/column selected in "userKeyField" drop-down list
+                        int existingUserId = GetExistingUserID(sourceUserId);
+
+                        if (existingUserId > 0)
                         {
-                            _logger.Log(string.Format("Error importing user Address '{0}': No user found with UserID or {1} equal to: '{2}'", row["AccessUserAddressName"], searchColumn, sourceUserId));
+                            if (sourceUserId != existingUserId.ToString())
+                            {
+                                updateUserIdSql.AppendFormat("update AccessUserAddressTempTableForBulkImport{0} set AccessUserAddressUserID='{1}' where AccessUserAddressUserID='{2}';",
+                                        mapping.GetId(), existingUserId.ToString(), sourceUserId);
+                            }
                         }
                         else
                         {
-                            _logger.Log(string.Format("Error importing user Address: No user found with ID or {0} equal to: '{1}'", searchColumn, sourceUserId));
+                            //User not found, write to log                            
+                            if (row.Table.Columns.Contains("AccessUserAddressName") && row["AccessUserAddressName"] != DBNull.Value && !string.IsNullOrEmpty(row["AccessUserAddressName"].ToString()))
+                            {
+                                _logger.Log(string.Format("Error importing user Address '{0}': No user found with UserID or {1} equal to: '{2}'", row["AccessUserAddressName"], searchColumn, sourceUserId));
+                            }
+                            else
+                            {
+                                _logger.Log(string.Format("Error importing user Address: No user found with ID or {0} equal to: '{1}'", searchColumn, sourceUserId));
+                            }
                         }
                     }
                 }
