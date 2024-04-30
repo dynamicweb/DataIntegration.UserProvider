@@ -50,13 +50,12 @@ internal class UserDestinationWriter : BaseSqlWriter
     //sets AccessUserNewsletterAllowed field to true if allowed
     private bool _allowEmail;
     //AccessUserGroupID for import all users to it if it exists
-    private string _importGroupID;
+    private readonly string _importGroupID;
 
     private List<UserPassword> UsersPasswordsToSend;
     private readonly int _passwordLength = 8;
     private string[] SearchingUserColumns = new string[] { "AccessUserID", "AccessUserUserName", "AccessUserCustomerNumber", "AccessUserEmail", "AccessUserExternalId" };
     private SystemFieldCollection SystemFields = SystemField.GetSystemFields("AccessUser");
-    private readonly bool discardDuplicates;
     protected DuplicateRowsHandler duplicateRowsHandler;
     private bool ImportUsersBelongExactlyImportGroups;
     private List<int> MappingIdsWithAaccessUserGroupsColumn = new List<int>();
@@ -125,7 +124,6 @@ internal class UserDestinationWriter : BaseSqlWriter
         Enum.TryParse(Dynamicweb.Configuration.SystemConfiguration.Instance.GetValue("/Globalsettings/Modules/Extranet/EncryptPasswordHash"), out hashAlgorithm);
         _userPasswordHashAlgorithm = hashAlgorithm;
 
-        this.discardDuplicates = discardDuplicates;
         bool discardDuplicatesFromMapping = false;
         if (!discardDuplicates)
         {
@@ -627,24 +625,29 @@ internal class UserDestinationWriter : BaseSqlWriter
                 break;
             case "AccessUserGroup":
                 string groupName = string.Empty;
-                if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserName") == null
-                    && columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserUserName") != null)
+                var accessUserNameMapping = columnMappings.FirstOrDefault(m => m.Active && m.DestinationColumn.Name == "AccessUserName");
+                var accessUserUserNameMapping = columnMappings.FirstOrDefault(m => m.Active && m.DestinationColumn.Name == "AccessUserUserName");
+                if (accessUserNameMapping == null && accessUserUserNameMapping != null)
                 {
-                    groupName = ((string)row[columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserUserName").SourceColumn.Name]).Trim();
+                    groupName = ((string)row[accessUserUserNameMapping.SourceColumn.Name]).Trim();
                     dataRow["AccessUserUserName"] = groupName;
                     dataRow["AccessUserName"] = groupName;//AccessUserName field should be the same as AccessUserUserName
                 }
-                else if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserUserName") == null
-                   && columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserName") != null)
+                else if (accessUserUserNameMapping == null && accessUserNameMapping != null)
                 {
-                    groupName = ((string)row[columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserName").SourceColumn.Name]).Trim();
+                    groupName = ((string)row[accessUserNameMapping.SourceColumn.Name]).Trim();
                     dataRow["AccessUserName"] = groupName;
                     dataRow["AccessUserUserName"] = groupName;//AccessUserUserName field should be the same as AccessUserName
+                }
+                else
+                {
+                    groupName = accessUserNameMapping.IsKey ? row[accessUserNameMapping.SourceColumn.Name].ToString().Trim() :
+                            row[accessUserUserNameMapping.SourceColumn.Name].ToString().Trim();
                 }
                 if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserActive") == null)
                 {
                     dataRow["AccessUserActive"] = true;
-                }
+                }                
                 if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserType") == null)
                 {
                     //Handle GroupType: If it is not existing group - import with AccessType = 2
@@ -677,7 +680,9 @@ internal class UserDestinationWriter : BaseSqlWriter
                         {
                             //In this case it is Non existing group, or Group with empty ParentGroup(root group)
                             //Fill HierarchyItems list with GroupName/ParentGroupName - to search by name after Group Insert
-                            if (!string.IsNullOrEmpty(parentGroupIDValue) && !string.IsNullOrEmpty(groupName))
+                            if (!string.IsNullOrEmpty(parentGroupIDValue) && !string.IsNullOrEmpty(groupName) &&
+                                // Avoid circular reference
+                                !string.Equals(parentGroupIDValue, groupName))
                             {
                                 GroupHierarchyItemsList.Add(new GroupHierarchyItem(groupName, parentGroupIDValue));
                             }
@@ -850,14 +855,14 @@ internal class UserDestinationWriter : BaseSqlWriter
         }
 
         try
-        {            
+        {
             if (deactivate &&
                 string.Compare(mapping.DestinationTable.Name, "AccessUser", StringComparison.OrdinalIgnoreCase) == 0)
-            {                
+            {
                 sqlClean.Append($"UPDATE [AccessUser] SET AccessUserActive = 0");
             }
             else
-            {                
+            {
                 sqlClean.Append($"DELETE FROM [{mapping.DestinationTable.SqlSchema}].[{destinationTableName}]");
             }
             sqlClean.Append($" WHERE NOT EXISTS  (SELECT * FROM [{mapping.DestinationTable.SqlSchema}].[{tempTableName}TempTableForBulkImport{mapping.GetId()}] where ");
@@ -1080,7 +1085,8 @@ internal class UserDestinationWriter : BaseSqlWriter
 
         string destinationTableName = mapping.DestinationTable.Name;
         string tempTableName = destinationTableName;
-        if (mapping.DestinationTable.Name == "AccessUserGroup")
+        bool isGroupImport = mapping.DestinationTable.Name == "AccessUserGroup";
+        if (isGroupImport)
         {
             //Groups should be imported to the same table as Users - AccessUser from AccessUserGroup temp table
             destinationTableName = "AccessUser";
@@ -1090,16 +1096,15 @@ internal class UserDestinationWriter : BaseSqlWriter
         List<string> insertColumns = new List<string>();
         try
         {
-            string sqlConditions = "";
+            List<string> sqlConditionsColumns = new List<string>();
             string firstKey = "";
-            var columnMappings = mapping.GetColumnMappings();            
+            var columnMappings = mapping.GetColumnMappings();
             bool isPrimaryKeyColumnExists = columnMappings.IsKeyColumnExists();
+            string tempTableAlias = $"[{mapping.DestinationTable.SqlSchema}].[{tempTableName}TempTableForBulkImport{mapping.GetId()}]";
+
             if (UseAutoSearching && !isPrimaryKeyColumnExists && mapping.DestinationTable.Name != "AccessUserGroup" && mapping.DestinationTable.Name != "AccessUserAddress")
             {
-                sqlConditions = sqlConditions + "[" + mapping.DestinationTable.SqlSchema + "].[" +
-                                                  destinationTableName + "].[AccessUserID]=[" +
-                                                  mapping.DestinationTable.SqlSchema + "].[" +
-                                                  tempTableName + "TempTableForBulkImport" + mapping.GetId() + "].[AccessUserID] ";
+                sqlConditionsColumns.Add("AccessUserId");
                 firstKey = "AccessUserID";
             }
             else
@@ -1111,17 +1116,13 @@ internal class UserDestinationWriter : BaseSqlWriter
                         SqlColumn column = (SqlColumn)columnMapping.DestinationColumn;
                         if (column.IsKeyColumn(columnMappings) || (!isPrimaryKeyColumnExists && !columnMapping.ScriptValueForInsert))
                         {
-                            sqlConditions = sqlConditions + "[" + mapping.DestinationTable.SqlSchema + "].[" +
-                                                  destinationTableName + "].[" + columnMapping.DestinationColumn.Name + "]=[" +
-                                                  mapping.DestinationTable.SqlSchema + "].[" +
-                                                  tempTableName + "TempTableForBulkImport" + mapping.GetId() + "].[" + columnMapping.DestinationColumn.Name + "] and ";
+                            sqlConditionsColumns.Add(columnMapping.DestinationColumn.Name);
 
                             if (firstKey == "")
                                 firstKey = columnMapping.DestinationColumn.Name;
                         }
                     }
                 }
-                sqlConditions = sqlConditions.Substring(0, sqlConditions.Length - 4);
             }
 
             var updateColumnList = new List<string>();
@@ -1133,8 +1134,8 @@ internal class UserDestinationWriter : BaseSqlWriter
                 {
                     insertColumns.Add("[" + columnMapping.DestinationColumn.Name + "]");
                     if (!((SqlColumn)columnMapping.DestinationColumn).IsIdentity && !((SqlColumn)columnMapping.DestinationColumn).IsKeyColumn(columnMappings) && !columnMapping.ScriptValueForInsert)
-                        updateColumnList.Add("[" + columnMapping.DestinationColumn.Name + "]=[" + mapping.DestinationTable.SqlSchema + "].[" + tempTableName + "TempTableForBulkImport" + mapping.GetId() + "].[" + columnMapping.DestinationColumn.Name + "]");
-                    insertSelectList.Add("[" + tempTableName + "TempTableForBulkImport" + mapping.GetId() + "].[" + columnMapping.DestinationColumn.Name + "]");
+                        updateColumnList.Add($"[{columnMapping.DestinationColumn.Name}]={tempTableAlias}.[{columnMapping.DestinationColumn.Name}]");
+                    insertSelectList.Add($"{tempTableAlias}.[" + columnMapping.DestinationColumn.Name + "]");
                 }
             }
 
@@ -1143,7 +1144,17 @@ internal class UserDestinationWriter : BaseSqlWriter
             if (updateColumnList.Any())
             {
                 var updateColumns = string.Join(",", updateColumnList);
-                sqlUpdateInsert = sqlUpdateInsert + "update [" + mapping.DestinationTable.SqlSchema + "].[" + destinationTableName + "] set " + updateColumns + " from [" + mapping.DestinationTable.SqlSchema + "].[" + tempTableName + "TempTableForBulkImport" + mapping.GetId() + "] where " + sqlConditions + ";";
+                var sqlUpdateConditions = GetSqlConditions(sqlConditionsColumns, "[t1]", tempTableAlias);
+
+                if (isGroupImport)
+                {
+                    var destinationGroupId = GetDestinationGroupId(columnMappings);
+                    if (destinationGroupId.HasValue && destinationGroupId.Value > 0)
+                    {
+                        sqlUpdateConditions += $" and [t1].[AccessUserId] <> {destinationGroupId.Value}";
+                    }
+                }
+                sqlUpdateInsert = $"update [t1] set {updateColumns} from {tempTableAlias} INNER JOIN [{mapping.DestinationTable.SqlSchema}].[{destinationTableName}] [t1] ON ({sqlUpdateConditions});";
             }
 
             if (HasIdentity(mapping))
@@ -1152,9 +1163,10 @@ internal class UserDestinationWriter : BaseSqlWriter
             }
 
             var insertSelect = string.Join(",", insertSelectList);
+            var sqlInsertConditions = GetSqlConditions(sqlConditionsColumns, $"[{mapping.DestinationTable.SqlSchema}].[{destinationTableName}]", tempTableAlias);
 
             sqlUpdateInsert = sqlUpdateInsert + " insert into [" + mapping.DestinationTable.SqlSchema + "].[" + destinationTableName + "] (" + string.Join(",", insertColumns) + ") (" +
-                "select " + insertSelect + " from [" + mapping.DestinationTable.SqlSchema + "].[" + tempTableName + "TempTableForBulkImport" + mapping.GetId() + "] left outer join [" + mapping.DestinationTable.SqlSchema + "].[" + destinationTableName + "] on " + sqlConditions + " where [" + mapping.DestinationTable.SqlSchema + "].[" + destinationTableName + "].[" + firstKey + "] is null);";
+                "select " + insertSelect + $" from {tempTableAlias} left outer join [" + mapping.DestinationTable.SqlSchema + "].[" + destinationTableName + "] on " + sqlInsertConditions + " where [" + mapping.DestinationTable.SqlSchema + "].[" + destinationTableName + "].[" + firstKey + "] is null);";
 
             if (HasIdentity(mapping))
             {
@@ -1173,12 +1185,37 @@ internal class UserDestinationWriter : BaseSqlWriter
         }
     }
 
+    private static string GetSqlConditions(List<string> sqlConditionsColumns, string destinationTableAlias, string sourceTableAlias)
+        => string.Join(" and ", sqlConditionsColumns.Select(c => $"{destinationTableAlias}.[{c}]={sourceTableAlias}.[{c}]"));
+
+    private int? GetDestinationGroupId(ColumnMappingCollection columnMappings)
+    {
+        var parentIdMapping = columnMappings.FirstOrDefault(cm => cm.Active && string.Equals(cm.DestinationColumn.Name, "AccessUserParentId", StringComparison.OrdinalIgnoreCase) &&
+                        cm.ScriptType == ScriptType.Constant && !string.IsNullOrEmpty(cm.ScriptValue));
+
+        if (parentIdMapping != null)
+        {
+            int groupId = Converter.ToInt32(parentIdMapping.ScriptValue);
+            //Look for existing groups by ID
+            bool isExistingGroup = groupId > 0 && ExistingUserGroupIDs.ContainsKey(groupId);
+            if (isExistingGroup)
+                return groupId;
+
+            //Look for existing groups by Name
+            if (ExistingUserGroups.ContainsKey(parentIdMapping.ScriptValue))
+            {
+                return (int)((DataRow)ExistingUserGroups[parentIdMapping.ScriptValue])["AccessUserID"];
+            }
+        }
+        return null;
+    }
+
     internal new void Close()
     {
         foreach (DataTable table in DataToWrite.Tables)
         {
             string tableName = GetTableNameWithoutPrefix(table.TableName) + "TempTableForBulkImport" + GetPrefixFromTableName(table.TableName);
-            _sqlCommand.CommandText = $"if exists (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'{tableName}') AND type in (N'U')) drop table [{tableName}]";            
+            _sqlCommand.CommandText = $"if exists (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'{tableName}') AND type in (N'U')) drop table [{tableName}]";
             _sqlCommand.ExecuteNonQuery();
         }
         GroupHierarchyItemsList = null;
@@ -1422,6 +1459,7 @@ internal class UserDestinationWriter : BaseSqlWriter
         if (DataToWrite.Tables[GetTableName("AccessUserAddress", mapping)] != null && DataToWrite.Tables[GetTableName("AccessUserAddress", mapping)].Rows.Count > 0 &&
             ExistingUsers.Rows.Count > 0)
         {
+            Dictionary<string, string> processedIds = new();
             _sqlCommand.Transaction = sqlTransaction;
             StringBuilder updateUserIdSql = new StringBuilder();
             foreach (DataRow row in DataToWrite.Tables[GetTableName("AccessUserAddress", mapping)].Rows)
@@ -1429,24 +1467,32 @@ internal class UserDestinationWriter : BaseSqlWriter
                 if (row["AccessUserAddressUserID"] != DBNull.Value && !string.IsNullOrEmpty(row["AccessUserAddressUserID"].ToString()))
                 {
                     string sourceUserId = row["AccessUserAddressUserID"].ToString();
-                    //search existing userId by Id and if not found by UserName/column selected in "userKeyField" drop-down list
-                    int existingUserId = GetExistingUserID(sourceUserId);
 
-                    if (existingUserId > 0)
+                    if (!processedIds.ContainsKey(sourceUserId))
                     {
-                        updateUserIdSql.AppendFormat("update AccessUserAddressTempTableForBulkImport{0} set AccessUserAddressUserID='{1}' where AccessUserAddressUserID='{2}';",
-                                mapping.GetId(), existingUserId.ToString(), sourceUserId);
-                    }
-                    else
-                    {
-                        //User not found, write to log                            
-                        if (row.Table.Columns.Contains("AccessUserAddressName") && row["AccessUserAddressName"] != DBNull.Value && !string.IsNullOrEmpty(row["AccessUserAddressName"].ToString()))
+                        processedIds.Add(sourceUserId, null);
+                        //search existing userId by Id and if not found by UserName/column selected in "userKeyField" drop-down list
+                        int existingUserId = GetExistingUserID(sourceUserId);
+
+                        if (existingUserId > 0)
                         {
-                            _logger.Log(string.Format("Error importing user Address '{0}': No user found with UserID or {1} equal to: '{2}'", row["AccessUserAddressName"], searchColumn, sourceUserId));
+                            if (sourceUserId != existingUserId.ToString())
+                            {
+                                updateUserIdSql.AppendFormat("update AccessUserAddressTempTableForBulkImport{0} set AccessUserAddressUserID='{1}' where AccessUserAddressUserID='{2}';",
+                                        mapping.GetId(), existingUserId.ToString(), sourceUserId);
+                            }
                         }
                         else
                         {
-                            _logger.Log(string.Format("Error importing user Address: No user found with ID or {0} equal to: '{1}'", searchColumn, sourceUserId));
+                            //User not found, write to log                            
+                            if (row.Table.Columns.Contains("AccessUserAddressName") && row["AccessUserAddressName"] != DBNull.Value && !string.IsNullOrEmpty(row["AccessUserAddressName"].ToString()))
+                            {
+                                _logger.Log(string.Format("Error importing user Address '{0}': No user found with UserID or {1} equal to: '{2}'", row["AccessUserAddressName"], searchColumn, sourceUserId));
+                            }
+                            else
+                            {
+                                _logger.Log(string.Format("Error importing user Address: No user found with ID or {0} equal to: '{1}'", searchColumn, sourceUserId));
+                            }
                         }
                     }
                 }
