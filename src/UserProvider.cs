@@ -719,16 +719,6 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
             Writer.DeleteExcessFromMainTable(sqlTransaction);
             sqlTransaction.Commit();
             Writer.SendUserPasswords();
-            if (Writer.RowsAffected > 0)
-            {
-                //Clear group cache for refreshing users in the groups they were imported
-                UserManagementServices.UserGroups.ClearCache();
-            }
-            PermissionService service = new PermissionService();
-            foreach (string id in Writer.UpdatedUsers)
-            {
-                service.ClearCacheByOwnerId(id);
-            }
             UpdateIndex();
         }
         catch (Exception ex)
