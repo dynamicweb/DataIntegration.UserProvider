@@ -11,6 +11,7 @@ using Dynamicweb.Security.UserManagement.Common.SystemFields;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data.SqlClient;
 using System.Globalization;
 using System.Linq;
@@ -133,7 +134,7 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
 
     public bool AllowEmail { get; set; }
 
-    [AddInParameter("Repositories index update"), AddInParameterEditor(typeof(DropDownParameterEditor), "multiple=true;none=true;Tooltip=Index update might affect on slower perfomance"), AddInParameterGroup("Destination")]
+    [Obsolete("Use Job.RepositoriesIndexSettings")]
     public string RepositoriesIndexUpdate { get; set; }
 
     [AddInParameter("Persist successful rows and skip failing rows"), AddInParameterEditor(typeof(YesNoParameterEditor), "Tooltip=Checking this box allows the activity to do partial imports by skipping problematic records and keeping the succesful ones"), AddInParameterGroup("Destination"), AddInParameterOrder(100)]
@@ -616,7 +617,6 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
         root.Add(CreateParameterNode(GetType(), "Delete users only from groups that are imported to", DeleteOnlyFromGroupsThatAreImportedTo.ToString(CultureInfo.CurrentCulture)));
         root.Add(CreateParameterNode(GetType(), "Discard duplicates", DiscardDuplicates.ToString()));
         root.Add(CreateParameterNode(GetType(), "Import users belong exactly import groups", ImportUsersBelongExactlyImportGroups.ToString(CultureInfo.CurrentCulture)));
-        root.Add(CreateParameterNode(GetType(), "Repositories index update", RepositoriesIndexUpdate));
         root.Add(CreateParameterNode(GetType(), "Persist successful rows and skip failing rows", SkipFailingRows.ToString()));
 
         document.Add(root);
@@ -729,7 +729,7 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
             {
                 service.ClearCacheByOwnerId(id);
             }
-            UpdateIndex();
+            MoveRepositoriesIndexToJob(job);
         }
         catch (Exception ex)
         {
@@ -879,35 +879,36 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
         }
     }
 
-    private void UpdateIndex()
+    private void MoveRepositoriesIndexToJob(Job job)
     {
         if (!string.IsNullOrEmpty(RepositoriesIndexUpdate))
         {
-            UpdateIndexes(RepositoriesIndexUpdate.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList());
+            char[] separator = [','];
+            // if the provider already have RepositoriesIndexUpdate set, then we move them to the job, and set the add-in to string.empty
+            if (job.RepositoriesIndexSettings?.RepositoriesIndexes?.Count == 0)
+            {
+                job.RepositoriesIndexSettings = new RepositoriesIndexSettings(new Collection<string>([.. RepositoriesIndexUpdate.Split(separator, StringSplitOptions.RemoveEmptyEntries)]));
+            }
+            RepositoriesIndexUpdate = string.Empty;
+            job.Save();
         }
     }
 
     public IEnumerable<ParameterOption> GetParameterOptions(string parameterName)
     {
-        switch (parameterName)
+        var options = new List<ParameterOption>();
+        var accessuserTable = GetSchema().GetTables().Find(t => t.Name == "AccessUser");
+        if (accessuserTable != null)
         {
-            case "Repositories index update":
-                return GetRepositoryIndexOptions();
-            default:
-                var options = new List<ParameterOption>();
-                var accessuserTable = GetSchema().GetTables().Find(t => t.Name == "AccessUser");
-                if (accessuserTable != null)
-                {
-                    foreach (Column column in accessuserTable.Columns)
-                    {
-                        options.Add(new(column.Name, column.Name));
-                    }
-                    if (!options.Any(option => option.Label == "Auto"))
-                    {
-                        options.Add(new("Auto", "Auto"));
-                    }
-                }
-                return options;
+            foreach (Column column in accessuserTable.Columns)
+            {
+                options.Add(new(column.Name, column.Name));
+            }
+            if (!options.Any(option => option.Label == "Auto"))
+            {
+                options.Add(new("Auto", "Auto"));
+            }
         }
+        return options;
     }
 }
