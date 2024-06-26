@@ -64,14 +64,6 @@ internal class UserDestinationWriter : BaseSqlWriter
     private List<int> MappingsWithUpdateUsersByCustomerNumberMode = new List<int>();
     private TableCollection _schemaTables = null;
 
-    /// <summary>
-    /// Return rows affected
-    /// </summary>
-    internal int RowsAffected
-    {
-        get; private set;
-    }
-
     public UserDestinationWriter(Job job, SqlConnection connection,
         bool removeMissingUsers, bool generateUserPasswords, bool encryptUserPasswords, bool removeMissingGroups, bool UseEmailForUsername,
         string userKeyField, string mailSubject, string senderEmail, string emailTemplate, bool allowEmail, string destinationGroup, bool deleteOnlyFromGroupsThatAreImportedTo, ILogger logger,

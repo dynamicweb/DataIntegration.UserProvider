@@ -255,6 +255,7 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
             UserKeyField = "Auto";
         DiscardDuplicates = false;
     }
+
     public override Schema GetOriginalSourceSchema()
     {
         List<string> tablestToKeep = new() { "AccessUser", "AccessUserAddress", "AccessUserSecondaryRelation" };
@@ -706,8 +707,10 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
                         while (!reader.IsDone())
                         {
                             sourceRow = reader.GetNext();
-                            ProcessInputRow(mapping, sourceRow);
-                            Writer.Write(sourceRow, mapping, discardDuplicates);
+                            if (ProcessInputRow(sourceRow, mapping))
+                            {
+                                Writer.Write(sourceRow, mapping, discardDuplicates);
+                            }
                         }
                     }
                 }
