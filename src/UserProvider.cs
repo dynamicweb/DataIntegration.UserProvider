@@ -5,8 +5,6 @@ using Dynamicweb.DataIntegration.ProviderHelpers;
 using Dynamicweb.Extensibility.AddIns;
 using Dynamicweb.Extensibility.Editors;
 using Dynamicweb.Logging;
-using Dynamicweb.Security.Permissions;
-using Dynamicweb.Security.UserManagement;
 using Dynamicweb.Security.UserManagement.Common.SystemFields;
 using Microsoft.CodeAnalysis;
 using System;
@@ -723,6 +721,7 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
             sqlTransaction.Commit();
             Writer.SendUserPasswords();
             MoveRepositoriesIndexToJob(job);
+            TotalRowsAffected += Writer.RowsAffected;
         }
         catch (Exception ex)
         {
@@ -751,6 +750,9 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
 
             if (sqlTransaction != null)
                 sqlTransaction.Rollback();
+
+            TotalRowsAffected = 0;
+
             return false;
         }
         finally
