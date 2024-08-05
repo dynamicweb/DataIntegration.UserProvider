@@ -459,7 +459,7 @@ internal class UserDestinationWriter : BaseSqlWriter
         foreach (ColumnMapping columnMapping in columnMappings.Where(cm => cm.Active))
         {
             object rowValue = null;
-            bool hasValueInRow = row.TryGetValue(columnMapping.SourceColumn?.Name, out rowValue);
+            bool hasValueInRow = columnMapping.SourceColumn is not null && row.TryGetValue(columnMapping.SourceColumn?.Name, out rowValue);
             if (columnMapping.HasScriptWithValue || hasValueInRow)
             {
                 object evaluatedValue = columnMapping.ConvertInputValueToOutputValue(rowValue);
@@ -478,7 +478,8 @@ internal class UserDestinationWriter : BaseSqlWriter
             }
             else
             {
-                throw new Exception(BaseDestinationWriter.GetRowValueNotFoundMessage(row, columnMapping.SourceColumn.Table.Name, columnMapping.SourceColumn.Name));
+                throw new Exception(GetRowValueNotFoundMessage(row, columnMapping.SourceColumn?.Table?.Name ?? columnMapping.DestinationColumn?.Table?.Name,
+                    columnMapping.SourceColumn?.Name ?? columnMapping.DestinationColumn?.Name));
             }
         }
 
@@ -522,7 +523,7 @@ internal class UserDestinationWriter : BaseSqlWriter
                             ColumnMapping cm = columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserEmail");
                             if (cm != null)
                             {
-                                dataRow["AccessUserUserName"] = row[cm.SourceColumn.Name];
+                                dataRow["AccessUserUserName"] = GetValue(cm, row);
                             }
                         }
                     }
@@ -531,9 +532,13 @@ internal class UserDestinationWriter : BaseSqlWriter
                         if (_useEmailForUsername)
                         {
                             ColumnMapping cm = columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserEmail");
-                            if (cm != null && !string.IsNullOrEmpty(Converter.ToString(row[cm.SourceColumn.Name])))
+                            if (cm != null)
                             {
-                                dataRow["AccessUserUserName"] = row[cm.SourceColumn.Name];
+                                var accessUserUserName = GetValue(cm, row);
+                                if (!string.IsNullOrEmpty(accessUserUserName))
+                                {
+                                    dataRow["AccessUserUserName"] = accessUserUserName;
+                                }
                             }
                         }
                     }
@@ -547,10 +552,10 @@ internal class UserDestinationWriter : BaseSqlWriter
                     //the user is being imported for the first time, there is a mapping, and the input is either NULL or ""                    
                     var pcm = columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserPassword");
                     bool isPasswordPresentInSource = pcm != null &&
-                        !string.IsNullOrEmpty(row[pcm.SourceColumn.Name] as string);
+                        !string.IsNullOrEmpty(GetValue(pcm, row));
                     if (isPasswordPresentInSource)
                     {
-                        password = row[pcm.SourceColumn.Name] as string;
+                        password = GetValue(pcm, row);
                         if (_encryptUserPasswords)
                         {
                             string encryptedPassword = encryptedPassword = Crypto.EncryptPassword(password, _userPasswordHashAlgorithm);
@@ -579,18 +584,20 @@ internal class UserDestinationWriter : BaseSqlWriter
                         string name = null;
                         var cm = columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserName");
                         if (cm != null)
-                            name = row[cm.SourceColumn.Name] as string;
+                            name = GetValue(cm, row);
                         string userName = null;
                         cm = columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserUserName");
                         if (cm != null)
-                            userName = row[cm.SourceColumn.Name] as string;
-                        if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserEmail") != null && Converter.ToBoolean(dataRow["AccessUserActive"]) == true)
+                            userName = GetValue(cm, row);
+                        var emailMapping = columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserEmail");
+                        if (emailMapping != null && Converter.ToBoolean(dataRow["AccessUserActive"]) == true)
                         {
-                            string email = row[columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserEmail").SourceColumn.Name] as string;
+                            string email = GetValue(emailMapping, row);
                             UserPassword userPasswordData = new UserPassword(userName, name, password, email);
-                            if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserCountry") != null)
+                            var countryMapping = columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserCountry");
+                            if (countryMapping != null)
                             {
-                                userPasswordData.Country = row[columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserCountry").SourceColumn.Name] as string;
+                                userPasswordData.Country = GetValue(countryMapping, row);
                             }
                             UsersPasswordsToSend.Add(userPasswordData);
                         }
@@ -621,25 +628,21 @@ internal class UserDestinationWriter : BaseSqlWriter
                 var accessUserUserNameMapping = columnMappings.FirstOrDefault(m => m.Active && m.DestinationColumn.Name == "AccessUserUserName");
                 if (accessUserNameMapping == null && accessUserUserNameMapping != null)
                 {
-                    groupName = ((string)row[accessUserUserNameMapping.SourceColumn.Name]).Trim();
+                    groupName = GetValue(accessUserUserNameMapping, row).Trim();
                     dataRow["AccessUserUserName"] = groupName;
                     dataRow["AccessUserName"] = groupName;//AccessUserName field should be the same as AccessUserUserName
                 }
                 else if (accessUserUserNameMapping == null && accessUserNameMapping != null)
                 {
-                    groupName = ((string)row[accessUserNameMapping.SourceColumn.Name]).Trim();
+                    groupName = GetValue(accessUserNameMapping, row).Trim();
                     dataRow["AccessUserName"] = groupName;
                     dataRow["AccessUserUserName"] = groupName;//AccessUserUserName field should be the same as AccessUserName
                 }
-                else
-                {
-                    groupName = accessUserNameMapping.IsKey ? row[accessUserNameMapping.SourceColumn.Name].ToString().Trim() :
-                            row[accessUserUserNameMapping.SourceColumn.Name].ToString().Trim();
-                }
+
                 if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserActive") == null)
                 {
                     dataRow["AccessUserActive"] = true;
-                }                
+                }
                 if (columnMappings.Find(m => m.DestinationColumn.Name == "AccessUserType") == null)
                 {
                     //Handle GroupType: If it is not existing group - import with AccessType = 2
@@ -689,17 +692,11 @@ internal class UserDestinationWriter : BaseSqlWriter
                 }
                 break;
             case "SystemFieldValue":
-                if (columnMappings.Find(cm => string.Compare(cm.DestinationColumn.Name, "SystemFieldValueSystemName", true) == 0) != null)
+                var fieldValueSystemName = GetValue(columnMappings.Find(cm => string.Compare(cm.DestinationColumn.Name, "SystemFieldValueSystemName", true) == 0), row);
+                if (!string.IsNullOrEmpty(fieldValueSystemName) && !SystemFields.Any(sf => string.Compare(sf.SystemName, fieldValueSystemName, true) == 0))
                 {
-                    if (row[columnMappings.Find(m => string.Compare(m.DestinationColumn.Name, "SystemFieldValueSystemName", true) == 0).SourceColumn.Name] != DBNull.Value)
-                    {
-                        string fieldValueSystemName = Converter.ToString(row[columnMappings.Find(m => string.Compare(m.DestinationColumn.Name, "SystemFieldValueSystemName", true) == 0).SourceColumn.Name]);
-                        if (!string.IsNullOrEmpty(fieldValueSystemName) && !SystemFields.Any(sf => string.Compare(sf.SystemName, fieldValueSystemName, true) == 0))
-                        {
-                            _logger.Log(string.Format("Can't find the '{0}' in the user system fields. Skipped row: '{1}'.", fieldValueSystemName, BaseProvider.GetFailedSourceRowMessage(row)));
-                            return;
-                        }
-                    }
+                    _logger.Log(string.Format("Can't find the '{0}' in the user system fields. Skipped row: '{1}'.", fieldValueSystemName, BaseProvider.GetFailedSourceRowMessage(row)));
+                    return;
                 }
                 dataRow["SystemFieldValueTableName"] = "AccessUser";
                 break;
@@ -1659,9 +1656,10 @@ internal class UserDestinationWriter : BaseSqlWriter
     {
         DataRow ret = null;
         var columnMappings = mapping.GetColumnMappings();
-        if (columnMappings.Find(m => string.Compare(m.DestinationColumn.Name, searchColumn, true) == 0) != null)
+        var cm = columnMappings.Find(m => string.Compare(m.DestinationColumn.Name, searchColumn, true) == 0);
+        if (cm != null)
         {
-            string searchValue = Converter.ToString(row[columnMappings.Find(m => string.Compare(m.DestinationColumn.Name, searchColumn, true) == 0).SourceColumn.Name]);
+            string searchValue = GetValue(cm, row);
             ret = GetExistingUserBySearchColumn(searchColumn, searchValue);
         }
         return ret;
@@ -1954,6 +1952,33 @@ internal class UserDestinationWriter : BaseSqlWriter
         {
             column.Name = groupDestinationColumnMapping[column.Name];
         }
+    }
+
+    private string GetValue(ColumnMapping? columnMapping, Dictionary<string, object> row)
+    {
+        string? result = null;
+        if (columnMapping != null && (columnMapping.HasScriptWithValue || row.ContainsKey(columnMapping.SourceColumn.Name)))
+        {
+            switch (columnMapping.ScriptType)
+            {
+                case ScriptType.None:
+                    result = Converter.ToString(row[columnMapping.SourceColumn.Name]);
+                    break;
+                case ScriptType.Append:
+                    result = Converter.ToString(row[columnMapping.SourceColumn.Name]) + columnMapping.ScriptValue;
+                    break;
+                case ScriptType.Prepend:
+                    result = columnMapping.ScriptValue + Converter.ToString(row[columnMapping.SourceColumn.Name]);
+                    break;
+                case ScriptType.Constant:
+                    result = columnMapping.GetScriptValue();
+                    break;
+                case ScriptType.NewGuid:
+                    result = columnMapping.GetScriptValue();
+                    break;
+            }
+        }
+        return result;
     }
 
     //internal void CleanRelationsTables(SqlTransaction transaction)
