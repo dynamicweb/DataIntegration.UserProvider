@@ -1037,11 +1037,12 @@ internal class UserDestinationWriter : BaseSqlWriter
                         groupMapping.AddMapping(randomColumn,
                             _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserActive"), false);
                     }
-                    if (groupColumnMappings.Find(cm => cm.DestinationColumn.Name == "AccessUserType") == null)
+                    var userTypeMapping = groupColumnMappings.Find(cm => cm.Active && cm.DestinationColumn.Name == "AccessUserType");
+                    if (userTypeMapping is null)
                     {
                         groupMapping.AddMapping(randomColumn,
-                            _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserType"), false);
-                    }
+                            _schemaTables.Find(t => t.Name == "AccessUser").Columns.Find(c => c.Name == "AccessUserType"), groupColumnMappings.IsKeyColumnExists());
+                    }                    
                 }
             }
         }
