@@ -705,10 +705,8 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
                         while (!reader.IsDone())
                         {
                             sourceRow = reader.GetNext();
-                            if (ProcessInputRow(sourceRow, mapping))
-                            {
-                                Writer.Write(sourceRow, mapping, discardDuplicates);
-                            }
+                            ProcessInputRow(mapping, sourceRow);
+                            Writer.Write(sourceRow, mapping, discardDuplicates);
                         }
                     }
                 }
