@@ -5,8 +5,6 @@ using Dynamicweb.DataIntegration.ProviderHelpers;
 using Dynamicweb.Extensibility.AddIns;
 using Dynamicweb.Extensibility.Editors;
 using Dynamicweb.Logging;
-using Dynamicweb.Security.Permissions;
-using Dynamicweb.Security.UserManagement;
 using Dynamicweb.Security.UserManagement.Common.SystemFields;
 using Microsoft.CodeAnalysis;
 using System;
@@ -255,6 +253,7 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
             UserKeyField = "Auto";
         DiscardDuplicates = false;
     }
+
     public override Schema GetOriginalSourceSchema()
     {
         List<string> tablestToKeep = new() { "AccessUser", "AccessUserAddress", "AccessUserSecondaryRelation" };
@@ -719,7 +718,7 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
             Writer.DeleteExcessFromMainTable(sqlTransaction);
             sqlTransaction.Commit();
             Writer.SendUserPasswords();
-            MoveRepositoriesIndexToJob(job);
+            MoveRepositoriesIndexToJob(job);            
         }
         catch (Exception ex)
         {
@@ -747,7 +746,8 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
             }
 
             if (sqlTransaction != null)
-                sqlTransaction.Rollback();
+                sqlTransaction.Rollback();            
+
             return false;
         }
         finally
