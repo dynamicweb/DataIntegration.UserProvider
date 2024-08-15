@@ -887,8 +887,7 @@ internal class UserDestinationWriter : BaseSqlWriter
             }
 
             sqlCommand.CommandText = sqlClean.ToString();
-            var rowsAffected = sqlCommand.ExecuteNonQuery();
-            RowsAffected += rowsAffected;
+            var rowsAffected = sqlCommand.ExecuteNonQuery();            
             if (rowsAffected > 0)
                 _logger.Log($"The number of deleted rows: {rowsAffected} for the destination {mapping.DestinationTable.Name} table mapping");
         }
@@ -1164,8 +1163,7 @@ internal class UserDestinationWriter : BaseSqlWriter
             }
 
             _sqlCommand.CommandText = sqlUpdateInsert;
-            var rowsAffected = _sqlCommand.ExecuteNonQuery();
-            RowsAffected += rowsAffected;
+            var rowsAffected = _sqlCommand.ExecuteNonQuery();            
             if (rowsAffected > 0)
                 _logger.Log($"The number of rows affected: {rowsAffected} in the {mapping.DestinationTable.Name} table");
         }
@@ -1245,7 +1243,7 @@ internal class UserDestinationWriter : BaseSqlWriter
             _sqlCommand.CommandText = updateParentGroupIdSql.ToString();
             try
             {
-                RowsAffected += _sqlCommand.ExecuteNonQuery();
+                _sqlCommand.ExecuteNonQuery();
             }
             catch (Exception ex)
             {
@@ -1369,7 +1367,7 @@ internal class UserDestinationWriter : BaseSqlWriter
                         //    string.Format("@{0}@", string.Join("@@", userGroupsRelations[userColumnUserValuePair])), userColumnUserValuePair.Item1, userColumnUserValuePair.Item2);
                         try
                         {
-                            RowsAffected += _sqlCommand.ExecuteNonQuery();
+                            _sqlCommand.ExecuteNonQuery();
                         }
                         catch (Exception ex)
                         {
@@ -1411,7 +1409,7 @@ internal class UserDestinationWriter : BaseSqlWriter
                                     //            groupId, column, users.ToString().TrimStart(new char[] { ',' }));
                                     try
                                     {
-                                        RowsAffected += _sqlCommand.ExecuteNonQuery();
+                                        _sqlCommand.ExecuteNonQuery();
                                     }
                                     catch (Exception ex)
                                     {
@@ -1848,7 +1846,7 @@ internal class UserDestinationWriter : BaseSqlWriter
             _sqlCommand.CommandText = updateUserIdSql.ToString();
             try
             {
-                RowsAffected += _sqlCommand.ExecuteNonQuery();
+                _sqlCommand.ExecuteNonQuery();
             }
             catch (Exception ex)
             {

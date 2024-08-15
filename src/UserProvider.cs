@@ -720,8 +720,7 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
             Writer.DeleteExcessFromMainTable(sqlTransaction);
             sqlTransaction.Commit();
             Writer.SendUserPasswords();
-            MoveRepositoriesIndexToJob(job);
-            TotalRowsAffected += Writer.RowsAffected;
+            MoveRepositoriesIndexToJob(job);            
         }
         catch (Exception ex)
         {
@@ -749,9 +748,7 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
             }
 
             if (sqlTransaction != null)
-                sqlTransaction.Rollback();
-
-            TotalRowsAffected = 0;
+                sqlTransaction.Rollback();            
 
             return false;
         }
