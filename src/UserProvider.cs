@@ -661,6 +661,24 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
         job.Mappings = tables;
     }
 
+    private static IEnumerable<ColumnMapping> ReplaceKeyColumnsWithAutoIdIfExists(Mapping mapping)
+    {
+        //will move this to MappingExtensions - US https://dev.azure.com/dynamicwebsoftware/Dynamicweb/_workitems/edit/20900
+        if (mapping == null) return [];
+
+        var autoIdDestinationColumnName = MappingExtensions.GetAutoIdColumnName(mapping.DestinationTable?.Name ?? "");
+        if (string.IsNullOrEmpty(autoIdDestinationColumnName)) return mapping.GetColumnMappings();
+
+        var columnMappings = mapping.GetColumnMappings().ToList();
+        var autoIdColumnMapping = columnMappings.Where(obj => obj.DestinationColumn.Name.Equals(autoIdDestinationColumnName, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+        if (autoIdColumnMapping != null)
+        {
+            columnMappings.ForEach(obj => obj.IsKey = false);
+            autoIdColumnMapping.IsKey = true;
+        }
+        return columnMappings;
+    }
+
     public override bool RunJob(Job job)
     {
         ReplaceMappingConditionalsWithValuesFromRequest(job);
@@ -693,8 +711,11 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
             }
             foreach (Mapping mapping in job.Mappings)
             {
-                if (mapping.Active && mapping.GetColumnMappings().Count > 0)
+                if (mapping.Active)
                 {
+                    var columnMapping = ReplaceKeyColumnsWithAutoIdIfExists(mapping);
+                    if (!columnMapping.Any()) continue;
+
                     Logger.Log("Importing data to table: " + mapping.DestinationTable.Name);
 
                     bool? optionValue = mapping.GetOptionValue("DiscardDuplicates");
