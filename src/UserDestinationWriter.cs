@@ -1508,7 +1508,13 @@ internal class UserDestinationWriter : BaseSqlWriter
         {
             if (!string.IsNullOrEmpty(_emailTemplate))
             {
-                Dynamicweb.Rendering.Template tmpl = new Dynamicweb.Rendering.Template(_emailTemplate);
+                var path = $"/UserManagement/UserProvider/{_emailTemplate}";
+                if (!System.IO.File.Exists(SystemInformation.MapPath($"/Files/Templates{path}")))
+                {
+                    _logger.Log($"E-mail template not found: '{path}'. Can't send user generated passwords.");
+                    return;
+                }
+                Rendering.Template tmpl = new Rendering.Template(path);
 
                 string fromEmail = _senderEmail;
                 if (!Core.Helpers.StringHelper.IsValidEmailAddress(fromEmail))
