@@ -25,6 +25,5 @@
 	<ItemGroup>
 		<PackageReference Include="Dynamicweb.DataIntegration" Version="10.8.0" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
-		<PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
 	</ItemGroup>
 </Project>
