@@ -1,4 +1,5 @@
-﻿using Dynamicweb.Data;
+﻿using Dynamicweb.Core;
+using Dynamicweb.Data;
 using Dynamicweb.DataIntegration.Integration;
 using Dynamicweb.DataIntegration.Integration.Interfaces;
 using Dynamicweb.DataIntegration.ProviderHelpers;
@@ -6,7 +7,6 @@ using Dynamicweb.Extensibility.AddIns;
 using Dynamicweb.Extensibility.Editors;
 using Dynamicweb.Logging;
 using Dynamicweb.Security.UserManagement.Common.SystemFields;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -19,7 +19,7 @@ using System.Xml.Linq;
 namespace Dynamicweb.DataIntegration.Providers.UserProvider;
 
 [AddInName("Dynamicweb.DataIntegration.Providers.Provider"), AddInLabel("User Provider"), AddInDescription("User provider"), AddInIgnore(false)]
-public class UserProvider : BaseSqlProvider, IParameterOptions
+public class UserProvider : BaseSqlProvider, IParameterOptions, ISource, IDestination
 {
     private Job _job = null;
     private UserDestinationWriter Writer = null;
@@ -541,8 +541,14 @@ public class UserProvider : BaseSqlProvider, IParameterOptions
         xmlTextWriter.WriteElementString("ImportUsersBelongExactlyImportGroups", ImportUsersBelongExactlyImportGroups.ToString(CultureInfo.CurrentCulture));
         xmlTextWriter.WriteElementString("RepositoriesIndexUpdate", RepositoriesIndexUpdate);
         xmlTextWriter.WriteElementString("SkipFailingRows", SkipFailingRows.ToString(CultureInfo.CurrentCulture));
-        GetSchema().SaveAsXml(xmlTextWriter);
+        if (!Feature.IsActive<SchemaManagementFeature>())
+            GetSchema().SaveAsXml(xmlTextWriter);
     }
+
+    string ISource.GetId() => "Source|UserProvider";
+
+    string IDestination.GetId() => "Destination|UserProvider";
+
 
     public override void UpdateSourceSettings(ISource source)
     {
