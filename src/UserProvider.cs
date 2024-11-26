@@ -727,8 +727,7 @@ public class UserProvider : BaseSqlProvider, IParameterOptions, ISource, IDestin
             sqlTransaction = Connection.BeginTransaction();
             Writer.MoveDataToMainTables(sqlTransaction);
             Writer.DeleteExcessFromMainTable(sqlTransaction);
-            sqlTransaction.Commit();
-            Writer.SendUserPasswords();
+            sqlTransaction.Commit();            
             MoveRepositoriesIndexToJob(job);
             TotalRowsAffected += Writer.RowsAffected;
         }
@@ -765,9 +764,7 @@ public class UserProvider : BaseSqlProvider, IParameterOptions, ISource, IDestin
             return false;
         }
         finally
-        {
-            if (Writer != null)
-                Writer.Close();
+        {            
             sourceRow = null;
         }
         if (IsFirstJobRun)
@@ -775,6 +772,18 @@ public class UserProvider : BaseSqlProvider, IParameterOptions, ISource, IDestin
             IsFirstJobRun = false;
         }
         return true;
+    }
+
+    void IDestination.Close(bool jobFailed)
+    {
+        if (Writer != null)
+        {
+            if (!jobFailed)
+            {
+                Writer.SendUserPasswords();
+            }
+            Writer.Close();
+        }
     }
 
     public override ISourceReader GetReader(Mapping mapping)
