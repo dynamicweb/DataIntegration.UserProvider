@@ -264,6 +264,9 @@ internal class UserDestinationWriter : BaseSqlWriter
 
     public void CreateTempTable(string tempTableSchema, string tempTableName, string tempTablePrefix, List<SqlColumn> destinationColumns)
     {
+        if (_sqlCommand.Connection.State != ConnectionState.Open)
+            _sqlCommand.Connection.Open();
+
         SQLTable.CreateTempTable(_sqlCommand, tempTableSchema, tempTableName, tempTablePrefix, destinationColumns, _logger);
     }
 
